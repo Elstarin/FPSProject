@@ -1,0 +1,1197 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#include "FPSProject.h"
+#include "FPSHUD.h"
+#include "FPSGameMode.h"
+#include "FPSCharacter.h"
+#include "Engine/Canvas.h"
+#include "Engine/Font.h"
+#include "Kismet/GameplayStatics.h"
+#include "MyStaticLibrary.h"
+#include <functional>
+// #include "MyStaticLibrary.h"
+
+// void AFPSHUD::DrawHUD(){
+//   Super::DrawHUD();
+//
+//   // find center of the Canvas
+//   const FVector2D Center(Canvas->SizeX * 0.5f, Canvas->SizeY * 0.5f);
+//
+//   // const FVector2D ViewportSize = FVector2D(GEngine->GameViewport->Viewport->GetSizeXY());
+//
+//   { // Draw chat box
+//     float messageH = 20.f;
+//     DrawRect(FLinearColor::Black, 0, 0, Canvas->SizeX, messageH);
+//   }
+//
+//   { // Handle print strings
+//     int32 count = 0;
+//     int32 height = 20;
+//     for (auto& str : FStrPrintArray){
+//       FVector2D GameOverSize;
+//       GetTextSize(str, GameOverSize.X, GameOverSize.Y, HUDFont);
+//
+//       DrawText(str, FColor::Red, 20, height, HUDFont, 0.75f, true);
+//
+//       height += (GameOverSize.Y);
+//       count++;
+//     }
+//
+//     // for (int32 Index = 0; Index != printStrArray.Num(); ++Index)
+//     // {
+//     //   // DrawText(TEXT("Drawing2: ") + printStrArray[Index], FColor::Red, 150, 150, HUDFont);
+//     //   // GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, *(FString("TEXT2!")));
+//     //   // joinedStr += printStrArray[Index];
+//     //   // joinedStr += TEXT(" ");
+//     //   // DrawText(TEXT("Test text!"), FColor::Red, 150, 150, HUDFont);
+//     // }
+//   }
+//
+//   { // Draw very simple crosshair
+//     // const FVector2D Center(Canvas->ClipX * 0.5f, Canvas->ClipY * 0.5f);
+//
+//     float outPutValue = 1.32f;
+//
+//     // // Get the character and print stuff about it
+//     // AFPSCharacter* MyCharacter = Cast<AFPSCharacter>(UGameplayStatics::GetPlayerPawn(this, 0));
+//     // FString PowerLevelString = FString::Printf(TEXT("%10.1"), FMath::Abs(outPutValue));
+//     // // FString PowerLevelString = FString::Printf(TEXT("%10.1"), FMath::Abs(MyCharacter->PowerLevel));
+//     // DrawText(PowerLevelString, FColor::Red, 50, 50, HUDFont);
+//     // DrawText(TEXT("Test text!"), FColor::Red, 150, 150, HUDFont);
+//
+//   	AFPSGameMode* MyGameMode = Cast<AFPSGameMode>(UGameplayStatics::GetGameMode(this));
+//
+//     // // If the game is over
+//     // if (MyGameMode->GetCurrentState() == EFPSProjectPlayState::EGameOver){
+//     //   // Create a variable for storing the size of printing Game Over
+//     //   FVector2d GameOverSize;
+//     //   GetTextSize(TEXT("GAME OVER"), GameOverSize.X, GameOverSize.Y, HUDFont);
+//     //   DrawText(TEXT("GAME OVER"), FColor::White, (ScreenDimensions.X - GameOverSize.X) / 2.0f, (ScreenDimensions.Y - GameOverSize.Y) / 2.0f, HUDFont);
+//     // }
+//
+//     // offset by half the texture's dimensions so that the center of the texture aligns with the center of the Canvas
+//     const FVector2D CrosshairDrawPosition((Center.X - (CrosshairTex->GetSurfaceWidth() * 0.5)), (Center.Y - (CrosshairTex->GetSurfaceHeight() * 0.5f)));
+//
+//     // draw the crosshair
+//     FCanvasTileItem TileItem( CrosshairDrawPosition, CrosshairTex->Resource, FLinearColor::White);
+//     TileItem.BlendMode = SE_BLEND_Translucent;
+//     Canvas->DrawItem( TileItem );
+//   }
+// }
+
+#define BUTTONTYPE_MAIN_RESTART 1
+#define BUTTONTYPE_MAIN_EXIT 2
+ 
+#define BUTTONTYPE_CONFIRM_YES 1
+#define BUTTONTYPE_CONFIRM_NO 2
+ 
+#define CANVAS_WHITE if (Canvas) Canvas->SetDrawColor(FColor_White);
+ 
+//Cursor Draw Offset
+// use this to position texture over the point of your cursor,
+// if the point is not at exactly 0,0
+#define CURSOR_DRAW_OFFSET 3
+ 
+// Static constants ////////////////////////////////////////////////////////////
+const FString AFPSHUD::S_Title_Main = FString("Joy!");
+const FString AFPSHUD::S_Title_Confirm = FString("Exit Game?");
+ 
+const FString AFPSHUD::S_Button_Restart = FString("Restart");
+const FString AFPSHUD::S_Button_Exit = FString("Exit");
+ 
+// Colors
+const FColor AFPSHUD::FColorBlack = FColor(0,0,0,255);
+const FColor AFPSHUD::FColorRed = FColor(255,0,0,255);
+const FColor AFPSHUD::FColorYellow = FColor(255,255,0,255);
+const FColor AFPSHUD::FColorBlue = FColor(0,0,255,255);
+const FColor AFPSHUD::FColor_White = FColor(255,255,255,255);
+// Backgrounds
+const FLinearColor AFPSHUD::LC_Black = FLinearColor(0, 0, 0, 1);
+const FLinearColor AFPSHUD::LC_Pink = FLinearColor(1, 0, 1, 1);
+const FLinearColor AFPSHUD::LC_Red = FLinearColor(1, 0, 0, 1);
+const FLinearColor AFPSHUD::LC_Yellow = FLinearColor(1, 1, 0, 1);
+////////////////////////////////////////////////////////////////////////////////
+
+class FrameText
+{
+  private:
+    int32 w, h;
+    int32 x, y;
+    int32 r, g, b, a;
+    int32 scale;
+    bool shown;
+    FString type;
+    FString strata;
+    FString name;
+    // Frame* parent;
+    static int32 count;
+    
+  public:
+};
+
+class Frame
+{
+  private:
+    int32 w, h;
+    int32 x, y;
+    int32 r, g, b, a;
+    int32 scale;
+    int32 level;
+    bool shown;
+    FString type;
+    FString strata;
+    FString name;
+    Frame* parent;
+    static int32 count;
+    
+    enum AnchorPoints
+    {
+      TOPLEFT,
+      TOP,
+      TOPRIGHT,
+      LEFT,
+      CENTER,
+      RIGHT,
+      BOTTOMLEFT,
+      BOTTOM,
+      BOTTOMRIGHT,
+    };
+    
+    struct Level
+    {
+      static TArray<Frame*> FrameList;
+      Level(){}
+    };
+    
+    struct Strata // The basic array
+    {
+      static TMap<int32, Level> LevelMap;
+      Strata(){}
+    };
+  public:
+    static const FString strataList[5];
+    
+    static TMap<FString, Strata> StrataMap;
+    static TArray<FrameText> TextList;
+    // TArray<FString> Scripts;
+    
+    Frame();
+    
+    ~Frame() // Destructor
+    {
+      // for (auto& f : frameList)
+      // {
+      //
+      // }
+      // frameList.Remove(this); // Find it and remove it
+      
+      count--; // Track the total number of frames
+    }
+    
+    // Get functions /////////////////////////////////////////////////////////////
+    int32 GetWidth() const {return w;}
+    int32 GetHeight() const {return h;}
+    int32 GetSize() const {return w, h;}
+    int32 GetX() const {return x;}
+    int32 GetY() const {return y;}
+    int32 GetPosition() const {return x, y;}
+    int32 GetColorInt() const {return r, g, b, a;}
+    FLinearColor GetColor() const {return FLinearColor(r, g, b, a);}
+    int32 GetAlpha() const {return a;}
+    int32 GetScale() const {return scale;}
+    int32 GetLevel() const {return level;}
+    bool IsShown() const {return shown;}
+    FString GetType() const {return type;}
+    FString GetStrata() const {return strata;}
+    FString GetName() const {return name;}
+    Frame* GetParent() const {return parent;}
+    Frame& GetPtr(){return *this;}
+    //////////////////////////////////////////////////////////////////////////////
+    
+    // Set functions /////////////////////////////////////////////////////////////
+    void SetWidth(int32 nW){w = nW;}
+    void SetHeight(int32 nH){h = nH;}
+    void SetSize(int32 nW, int32 nH){w = nW; h = nH;}
+    void SetX(int32 nX){x = nX;}
+    void SetY(int32 nY){y = nY;}
+    void SetPosition(int32 nX, int32 nY){x = nX; y = nY;}
+    void SetScale(int32 nScale){scale = nScale;}
+    void SetName(FString nName){name = nName;}
+    void SetType(FString nType){type = nType;}
+    void SetShown(bool nVisibility){shown = nVisibility;}
+    
+    void SetScript(FString nScript)
+    {
+      // script = nScript
+    }
+    
+    void SetColor(int32 nR = 1.f, int32 nG = 1.f, int32 nB = 1.f, int32 nA = 1.f)
+    {
+      if ((0.f >= nR) && (nR > 1.f)) // It is between 0 and 1
+      {
+        r = nR;
+      }
+      else if (0.f >= nR) // To low
+      {
+        r = 0.f;
+      }
+      else if (nR >= 1.f) // To high
+      {
+        r = 1.f;
+      }
+      
+      if ((0.f >= nG) && (nG > 1.f))
+      {
+        g = nG;
+      }
+      else if (0.f >= nG)
+      {
+        g = 0.f;
+      }
+      else if (nG >= 1.f)
+      {
+        g = 1.f;
+      }
+      
+      if ((0.f >= nB) && (nB > 1.f))
+      {
+        b = nB;
+      }
+      else if (0.f >= nB)
+      {
+        b = 0.f;
+      }
+      else if (nB >= 1.f)
+      {
+        b = 1.f;
+      }
+      
+      if ((0.f >= nA) && (nA > 1.f))
+      {
+        a = nA;
+      }
+      else if (0.f >= nA)
+      {
+        a = 0.f;
+      }
+      else if (nA >= 1.f)
+      {
+        a = 1.f;
+      }
+    }
+    
+    void SetAlpha(int32 nA)
+    {
+      if ((0.f >= nA) && (nA > 1.f)) // It is between 0 and 1
+      {
+        a = nA;
+      }
+      else if (0.f >= nA) // To low
+      {
+        a = 0.f;
+      }
+      else if (nA >= 1.f) // To high
+      {
+        a = 1.f;
+      }
+    }
+    
+    void SetLevel(int32 nLevel)
+    {
+      if ((nLevel >= -10.f) && (nLevel <= 10.f))
+      {
+        level = nLevel;
+      }
+      else
+      {
+        print("Invalid level:", nLevel);
+      }
+    }
+    
+    void SetStrata(FString nStrata)
+    {
+      // Make sure it's a valid strata
+      if (
+          (nStrata == "BACKGROUND") ||
+          (nStrata == "LOW") ||
+          (nStrata == "MEDIUM") ||
+          (nStrata == "HIGH") ||
+          (nStrata == "OVERLAY")
+        )
+      {
+        strata = nStrata;
+      }
+      else // Not valid
+      {
+        print("Invalid strata: ", nStrata);
+      }
+    }
+    
+    void SetParent(){};
+    //////////////////////////////////////////////////////////////////////////////
+    
+    static Frame* CreateFrame(FString nName, FString nStrata, int32 nLevel);
+};
+
+Frame::Frame() // Constructor
+{
+  w = 0.f;
+  h = 0.f;
+  x = 0.f;
+  y = 0.f;
+  r = 0.f;
+  g = 0.f;
+  b = 0.f;
+  a = 0.f;
+  shown = true;
+  scale = 1.f;
+  level = 0.f;
+  strata = "BACKGROUND";
+  name = "Frame_" + FString::FromInt(count);
+  // Frame* parent;
+  
+  count++; // Track the total number of frames
+}
+
+Frame* Frame::CreateFrame(FString nName = "NAME", FString nStrata = "BACKGROUND", int32 nLevel = 0)
+{
+  Frame* f = new Frame();
+  
+  // delete f; // TODO: Move this to the right place.
+  
+  f->SetName(nName);
+  f->strata = nStrata;
+  f->level = nLevel;
+
+  if (!StrataMap.Contains(f->strata)) // Hasn't been added before
+  {
+    Strata strataObj;
+    StrataMap.Emplace(f->strata, strataObj); // Add the new strata to the list
+  }
+
+  if (!StrataMap[f->strata].LevelMap.Contains(f->level)) // Hasn't been added before
+  {
+    Level levelObj;
+    StrataMap[f->strata].LevelMap.Emplace(f->level, levelObj); // Add the new level to the list
+    // StrataMap[strata].LevelMap[level].Sort(); // Sort them
+  }
+
+  StrataMap[f->strata].LevelMap[f->level].FrameList.Emplace(f); // Store it
+
+  return f;
+}
+
+// Frame BaseFrame;
+
+int32 Frame::count = 0;
+TMap<FString, Frame::Strata> Frame::StrataMap;
+const FString Frame::strataList[5] = {"BACKGROUND", "LOW", "MEDIUM", "HIGH", "OVERLAY"};
+
+TArray<Frame*> Frame::Level::FrameList;
+TMap<int32, Frame::Level> Frame::Strata::LevelMap;
+
+AFPSHUD::AFPSHUD(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer){
+  // static TArray<Frame> frameList;
+  
+  // Use the RobotoDistanceField font from the engine
+  static ConstructorHelpers::FObjectFinder<UFont>HUDFontOb(TEXT("/Engine/EngineFonts/RobotoDistanceField"));
+  HUDFont = HUDFontOb.Object;
+
+  // Set the crosshair texture
+  static ConstructorHelpers::FObjectFinder<UTexture2D> CrosshairTexObj(TEXT("Texture2D'/Game/crosshair.crosshair'"));
+  CrosshairTex = CrosshairTexObj.Object;
+  
+	//Draw HUD?
+	DontDrawHUD = false;
+
+	//States
+	ConfirmDialogOpen = false;
+	InMainMenu = true;
+
+  bDrawFrames = true;
+
+  bShowMessages = true;
+  
+  bShowMainMenu = false;
+  
+	//Scale
+	GlobalHUDMult = 1;
+	DefaultFontScale = 0.7;   //scaling down a size 36 font
+}
+ 
+//Core
+ 
+void AFPSHUD::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+ 
+	//Establish the PC
+	ThePC = GetOwningPlayerController();
+ 
+	//How to get a ref to your custom PC
+	//AYourPlayerController* YourChar = Cast<AYourPlayerController>(ThePC);
+ 
+	//How to Get The Character
+	//AYourCharacterClass* YourChar = Cast<AYourCharacterClass>(GetOwningPawn());
+}
+ 
+//===============
+// Draw Dialogs
+//===============
+void AFPSHUD::DrawHUD_DrawDialogs()
+{
+	if (ConfirmDialogOpen) DrawConfirm();
+}
+
+FString AFPSHUD::EscapeSequences(int32 searchNum, FString str)
+{
+  auto arr = str.GetCharArray();
+  
+  int32 index = searchNum + 1;
+  
+  // Color sequence
+  if (arr[index] == 'c'){
+    int counter = 0;
+    char hex[8] = {};
+    
+    // Go until the next closing sequence
+    while ((arr[index] != '|') && (arr[index + 1] != 'r')){
+      index++;
+    
+      // Capture the next 8 characters, they are the hex code
+      if (7 >= counter){
+        hex[counter] = arr[index];
+    
+        counter++;
+      }
+    }
+    
+    str.RemoveAt(searchNum, (searchNum + 9), true); // Remove the start of the sequence
+    str.RemoveAt(index, (index + 1), true); // Remove the end of the sequence
+  }
+  
+  return str;
+}
+
+void AFPSHUD::addMessage(Message msg)
+{
+  messages.Add(msg);
+}
+
+void AFPSHUD::DrawMessageBox()
+{
+  for (int i = messages.Num() - 1; i >= 0; i--)
+  {
+    float outputWidth, outputHeight, pad = 10.f;
+    
+    GetTextSize(messages[i].message, outputWidth, outputHeight, HUDFont, 1.f);
+    
+    float messageH = outputHeight + 2.f * pad;
+    float x = 0.f, y = i * messageH;
+    
+    DrawRect(FLinearColor::Black, x, y, Canvas->SizeX, messageH);
+    
+    DrawText(
+    messages[i].message,
+    messages[i].color,
+    (x + pad),
+    (y + pad),
+    HUDFont,
+    0.75f,
+    false);
+    
+    messages[i].time -= GetWorld()->GetDeltaSeconds();
+    
+    // Expired, remove it
+    if (messages[i].time <= 0)
+    {
+      messages.RemoveAt(i);
+    }
+  }
+}
+
+void AFPSHUD::DrawPrintBox()
+{
+  if (!bShowMessages) return; // Only run if true
+  
+  const float maxX = Canvas->SizeX * 0.5f;
+  const float maxY = Canvas->SizeY * 0.28f;
+  const float textScale = 0.75f;
+  const int32 maxDisplayed = 10; // Total number of strings to be displayed at once
+  const int32 maxStored = 20; // Total number of strings that can be stored
+  const int32 arrayNum = FStrPrintArray.Num();
+  const int32 offsetX = 10;
+  const int32 offsetY = 20;
+  const int32 startX = 0;
+  const int32 startY = Canvas->SizeY - maxY;
+  
+  DrawRect(FLinearColor(0, 0, 0, 0.15f), startX, startY, maxX, maxY);
+  
+  { // Handle print strings
+    int32 i = arrayNum;
+    
+    if (arrayNum > 0){ // Only run if it actually has some values
+      int32 height = offsetY;
+      int32 stop = (arrayNum - maxDisplayed);
+      int32 count = 0;
+      
+      if (0 > stop) stop = 0; // Make sure it's positive
+      
+      for (i = arrayNum; i >= stop; i--){
+        if (FStrPrintArray.IsValidIndex(i)){
+          FString str = FStrPrintArray[i];
+          
+          FVector2D textSize;
+          GetTextSize(str, textSize.X, textSize.Y, HUDFont);
+          
+          textSize.X *= textScale;
+          textSize.Y *= textScale;
+          
+          if ((textSize.X + (offsetX * textScale)) < maxX){ // Check if it fits in the box
+            // int32 searchNum = 0;
+            // // Has an escape character
+            // if (str.FindChar('|', searchNum)){
+            //   int32 index = searchNum + 1;
+            //
+            //   if (str.Len() > 35){
+            //     int32 num1 = 4;
+            //     int32 num2 = 36;
+            //     str.ReplaceEscapedCharWithChar();
+            //     // str.Replace(TEXT(" "), TEXT("~"));
+            //     // str.RemoveAt(num1, num2, true); // Remove the start of the sequence
+            //     str.Replace(TEXT("|"), TEXT("~"));
+            //   }
+            // }
+            
+            // Outline
+            DrawText(str, FColor(0, 0, 0, 255), (startX + offsetX) + 2, ((startY + maxY) - height) + 2, HUDFont, textScale, false);
+            
+            // Actual text
+            DrawText(str, FColor(100, 175, 255, 255), (startX + offsetX), ((startY + maxY) - height), HUDFont, textScale, false);
+            height += (textSize.Y);
+          } else { // Doesn't fit, resize it
+            float percent = (1 - (maxX / (textSize.X + (offsetX * textScale))) * 1); // How much to cut
+            int32 length = str.Len(); // Total number of characters
+            int32 splitPoint = floor(length - (length * percent));
+            
+            // UE_LOG(Main, Warning, TEXT("BEFORE: %s"), *FStrPrintArray[i]);
+            FStrPrintArray[i].RemoveAt(splitPoint, (length - splitPoint), true); // Remove the end
+            FStrPrintArray.Insert((str.RightChop(splitPoint).Trim()), i); // Insert the extra into the array
+            
+            str.InsertAt(splitPoint, "\n"); // Insert new line just for use this one time
+            DrawText(str, FColor::Blue, (startX + offsetX), ((startY + maxY) - height), HUDFont, textScale, false);
+            
+            height += (textSize.Y * 2); // Twice as much height
+          }
+        }
+      }
+    }
+    
+    // Wait until there are 10 strings too many, then clear them out
+    if (arrayNum > (maxStored + 10)){
+      // int32 index;
+      
+      for (i = (arrayNum - maxStored); i != 0; i--){
+        if (FStrPrintArray.IsValidIndex(i)){
+          // Run from (total number of elements - maxStored) down to 0, removing each
+          // Lowest numbers are the oldest values here
+          FStrPrintArray.RemoveAt(i);
+        }
+      }
+    }
+  }
+  
+	// DrawJoyRect(Canvas->SizeX / 2 - 100, Canvas->SizeY / 2 - 50, 200, 100, FLinearColor(0, 0, 1, 0.2333));
+}
+
+TMap<int32, std::function<void ()>> TimerMap;
+TMap<int32, std::function<void ()>> TickerMap;
+
+class Timer
+{
+  private:
+    
+  public:
+    struct TimerStruct
+    {
+      int32 remaining;
+      std::function<void ()> callback;
+      
+      TimerStruct()
+      {
+        
+      }
+    };
+    
+    struct TickerStruct
+    {
+      int32 current;
+      int32 interval;
+      std::function<void ()> callback;
+      int32 ticks;
+      
+      TickerStruct()
+      {
+        print("Ticker created");
+      }
+      ~TickerStruct()
+      {
+        print("Ticker destroyed");
+      }
+    };
+    
+    static TArray<TimerStruct> TimerList;
+    static TArray<TickerStruct> TickerList;
+    
+    // static void SetTimer(void (*func)())
+    // {
+    //   func();
+    //   print("Timer set...");
+    // }
+    
+    static void SetTimer(int32 time, std::function<void ()> func)
+    {
+      TimerStruct timer;
+      
+      timer.remaining = time + GetTime();
+      timer.callback = func;
+      
+      TimerList.Emplace(timer);
+    }
+    
+    static void SetTicker(int32 time, std::function<void ()> func, int32 numTicks = -1)
+    {
+      TickerStruct ticker;
+      
+      ticker.current = time + GetTime();
+      ticker.interval = time;
+      ticker.callback = func;
+      ticker.ticks = numTicks;
+      
+      TickerList.Emplace(ticker);
+    }
+};
+
+// Static arrays from Timer class
+TArray<Timer::TimerStruct> Timer::TimerList;
+TArray<Timer::TickerStruct> Timer::TickerList;
+
+void callbackFunc()
+{
+  print("Function called back!");
+}
+
+void AFPSHUD::Startup()
+{
+  static bool hasRun = false;
+  if (hasRun) return;
+  hasRun = true;
+  
+  Timer::SetTimer(3, callbackFunc);
+  // Timer::SetTicker(1.5, callbackFunc, 20);
+  
+  auto f1 = Frame::CreateFrame("Frame1", "BACKGROUND", 0);
+  f1->SetPosition(200, 200);
+  f1->SetSize(100, 100);
+  f1->SetColor(1.f, 1.f, 1.f, 1.f);
+  
+  auto f2 = Frame::CreateFrame("Frame2", "BACKGROUND", 0);
+  f2->SetPosition(0, 0);
+  f2->SetSize(200, 200);
+  f2->SetColor(0, 0, 0, 1);
+}
+
+void AFPSHUD::DrawFrames()
+{
+  auto cTime = GetTime(); // Current time since game started
+  static int32 i;
+  
+  i = 0;
+  for (auto& timer : Timer::TimerList)
+  {
+    if (cTime >= timer.remaining) // Timer is up
+    {
+      timer.callback(); // Call its function
+      
+      if (Timer::TimerList.IsValidIndex(i)) // Make sure it's safe
+      {
+        Timer::TimerList.RemoveAt(i);
+      }
+      else
+      {
+        i++;
+      }
+    }
+  }
+  
+  for (auto& ticker : Timer::TickerList)
+  {
+    if (cTime >= ticker.current) // Make it tick
+    {
+      ticker.callback(); // Call its function
+      ticker.current += ticker.interval; // Set it for the next tick
+      ticker.ticks--; // Take 1 off its remaining ticks
+      
+      if (ticker.ticks == 0) // No ticks left, remove it
+      {
+        int32 indexNum;
+        Timer::TickerList.Find(ticker, indexNum);
+        
+        // if (indexNum)
+        // {
+          Timer::TickerList.RemoveAt(indexNum);
+          // Timer::TickerList.Remove(ticker);
+        // }
+      }
+    }
+  }
+  
+  if (!bDrawFrames) return; // If false, return
+  
+  static int32 frameX;
+  static int32 frameY;
+  static int32 frameW;
+  static int32 frameH;
+  static int32 count; // Total number of frames drawn
+  count = 0;
+
+  static float cWidth = Canvas->SizeX;
+  static float cHeight = Canvas->SizeY;
+
+  for (auto& strata : Frame::strataList) // Run through each strata
+  {
+    if (Frame::StrataMap.Contains(strata)) // This strata has been added
+    {
+      for (int32 i = -10; i <= 10; i++) // Run through all frame levels for this strata
+      {
+        if (Frame::StrataMap[strata].LevelMap.Contains(i)) // There are frames for this level
+        {
+          for (auto& f : Frame::StrataMap[strata].LevelMap[i].FrameList)
+          {
+            if (f->IsShown()) // If not shown, don't draw it (obviously)
+            {
+              frameX = f->GetX();
+              frameY = f->GetY();
+              frameW = f->GetWidth();
+              frameH = f->GetHeight();
+              
+              // If either are zero it won't be visible, so don't waste time drawing it
+              if ((frameW > 0) && (frameH > 0))
+              {
+                count++;
+                // Use a switch in here for category
+                
+                DrawRect( f->GetColor(),
+                          frameX,
+                          frameY,
+                          frameW,
+                          frameH);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+//Menus
+void AFPSHUD::DrawMainMenu(){
+  if (!bShowMainMenu) return; // If false, return
+  // DrawMaterialSimple(MaterialBackground, 10, 10, 256, 512, 1.3);
+  
+  const float width = Canvas->SizeX * 0.75f;
+  const float height = Canvas->SizeY * 0.5f;
+  // const int32 offsetX = Canvas->SizeX * 0.5f;
+  // const int32 offsetY = Canvas->SizeY * 0.5f;
+  const int32 startX = (Canvas->SizeX * 0.5f) - (width * 0.5f);
+  const int32 startY = (Canvas->SizeY * 0.4f) - (height * 0.5f);
+  
+  DrawRect(FLinearColor(0, 0, 0, 0.6f), startX, startY, width, height);
+  
+  // DrawRect(FLinearColor::Black, 200, 200, 100.f, 100.f);
+ 
+	//Menu Title
+ 
+	//Draw buttons
+	// DrawMainMenuButtons();
+}
+
+void AFPSHUD::DrawConfirm(){
+	//Blue rect with alpha 50%
+	DrawJoyRect(Canvas->SizeX / 2 - 100, Canvas->SizeY / 2 - 50, 200, 100, FLinearColor(0, 0, 1, 0.2333));
+ 
+	//Confirm Title
+ 
+	//Draw buttons
+	DrawConfirmButtons();
+}
+ 
+//Buttons
+void AFPSHUD::DrawMainMenuButtons(){
+	//Start Point
+	float xStart = 100;
+	float yStart = 110;
+ 
+	//Background
+	VDrawTile(ButtonBackground, xStart, yStart, 150, 80, FColor(255, 255, 255, 120)); //alpha 120/255
+ 
+	//Text
+	DrawJoyText(
+		VerdanaFont, "Restart", xStart + 30, yStart + 20,
+		LC_Black, DefaultFontScale,
+		true,LC_Red
+	);
+ 
+	//Struct
+	//Add Button If Necessary
+	//		could be cleared and need refreshing if using a different menu
+	//			clear buttons with ButtonsMain.Empty()
+	if (ButtonsMain.Num() < 1 )
+	{
+		FJoyButtonStruct newButton = FJoyButtonStruct();
+		newButton.type 			= BUTTONTYPE_MAIN_RESTART;
+		newButton.toolTip		= "Restart the Game!";
+		newButton.minX 			= xStart;
+		newButton.maxX 			= xStart + 150;
+		newButton.minY 			= yStart;
+		newButton.maxY 			= yStart + 80;
+ 
+		//Add to correct array
+		ButtonsMain.Add(newButton);
+	}
+ 
+ 
+	xStart = 100;
+	yStart = 410;
+ 
+	VDrawTile(ButtonBackground,xStart,yStart,150,80,FColor(255,255,255,120)); //alpha 120/255
+ 
+	//Text
+	DrawJoyText(
+		VerdanaFont,"Exit",xStart+55,yStart+20,
+		LC_Black, DefaultFontScale,
+		true,LC_Red
+	);
+ 
+	if (ButtonsMain.Num() < 2 )
+	{
+		FJoyButtonStruct newButton = FJoyButtonStruct();
+		newButton.type 			= BUTTONTYPE_MAIN_EXIT;
+		newButton.toolTip			= "Exit the Game!";
+		newButton.minX 			= xStart;
+		newButton.maxX 			= xStart + 150;
+		newButton.minY 			= yStart;
+		newButton.maxY 			= yStart + 80;
+ 
+		//Add to correct array
+		ButtonsMain.Add(newButton);
+	}
+}
+
+void AFPSHUD::DrawConfirmButtons(){
+	float xStart = Canvas->SizeX/2 - 100;
+	float yStart = Canvas->SizeY/2 - 40;
+ 
+	//Highlighted?
+	if(ActiveButton_Type == BUTTONTYPE_CONFIRM_YES ) ColorPtr = &LC_Pink;
+	else ColorPtr = &LC_Yellow;
+ 
+	//Text
+	DrawJoyText(
+		VerdanaFont, "Yes", xStart + 30, yStart + 20,
+		*ColorPtr, DefaultFontScale,
+		true
+	);
+ 
+	if (ButtonsConfirm.Num() < 1){
+		FJoyButtonStruct newButton = FJoyButtonStruct();
+		newButton.type 			= BUTTONTYPE_CONFIRM_YES ;
+		newButton.toolTip			= "";
+		newButton.minX 			= xStart;
+		newButton.maxX 			= xStart + 75;
+		newButton.minY 			= yStart + 20;
+		newButton.maxY 			= yStart + 60;
+ 
+		//could use GetTextSize to streamline this
+ 
+		//Add to correct array
+		ButtonsConfirm.Add(newButton);
+	}
+ 
+	xStart = Canvas->SizeX/2 + 20;
+	yStart = Canvas->SizeY/2 - 40;
+ 
+	//Highlighted?
+	if(ActiveButton_Type == BUTTONTYPE_CONFIRM_NO) ColorPtr = &LC_Black;
+	else ColorPtr = &LC_Yellow;
+ 
+	//Text
+	DrawJoyText(
+		VerdanaFont,"No",xStart+30,yStart+20,
+		*ColorPtr, DefaultFontScale,
+		true
+	);
+ 
+	if (ButtonsConfirm.Num() < 2 )
+	{
+		FJoyButtonStruct newButton = FJoyButtonStruct();
+		newButton.type 			= BUTTONTYPE_CONFIRM_NO;
+		newButton.toolTip			= "";
+		newButton.minX 			= xStart;
+		newButton.maxX 			= xStart + 75;
+		newButton.minY 			= yStart + 20;
+		newButton.maxY 			= yStart + 60;
+ 
+		//could use GetTextSize to streamline this
+ 
+		//Add to correct array
+		ButtonsConfirm.Add(newButton);
+	}
+}
+ 
+//===============
+// Cursor In Buttons
+//===============
+int32 AFPSHUD::CheckCursorInButton(const TArray<FJoyButtonStruct>& ButtonArray){
+	for (int32 b = 0; b < ButtonArray.Num(); b++){
+		CurCheckButton = &ButtonArray[b];
+ 
+		//check cursor in bounds
+		if (CurCheckButton->minX <= MouseLocation.X && MouseLocation.X <= CurCheckButton->maxX &&
+			CurCheckButton->minY <= MouseLocation.Y && MouseLocation.Y <= CurCheckButton->maxY){
+ 
+			//Active Button Type
+			ActiveButton_Type = CurCheckButton->type;
+ 
+			//Tool Tip
+			ActiveButton_Tip = CurCheckButton->toolTip;
+ 
+			//Change Cursor
+			CursorHoveringInButton = true;
+ 
+			//Mouse Clicked?
+			if (ThePC->WasInputKeyJustPressed(EKeys::LeftMouseButton)){
+				return ActiveButton_Type;
+				//no need to check rest of buttons
+			}
+		}
+	}
+ 
+	//No Click Occurred This Tick
+	return -1;
+}
+ 
+//Check Confirm
+void AFPSHUD::CheckCursorInButtonsConfirm(){
+	//Check Confirm Buttons
+	ClickedButtonType = CheckCursorInButton(ButtonsConfirm); //fills global ActiveButton_Type
+ 
+	if (ClickedButtonType == BUTTONTYPE_CONFIRM_YES){
+		ThePC->ConsoleCommand("Exit");
+		return;
+	}
+  
+	if (ClickedButtonType == BUTTONTYPE_CONFIRM_NO){
+		ConfirmDialogOpen = false;
+		ButtonsConfirm.Empty(); //Buttons not needed anymore
+		return;
+	}
+}
+ 
+//Check Buttons
+void AFPSHUD::CheckCursorInButtonsMain(){
+	//Check Confirm Buttons
+	ClickedButtonType = CheckCursorInButton(ButtonsMain);
+ 
+	if (ClickedButtonType == BUTTONTYPE_MAIN_RESTART){
+		ThePC->ConsoleCommand("RestartLevel");
+		return;
+	}
+  
+	if (ClickedButtonType == BUTTONTYPE_MAIN_EXIT){
+		ConfirmDialogOpen = true;
+		return;
+	}
+}
+
+void AFPSHUD::DrawHUD_CheckCursorInButtons(){
+	if (ConfirmDialogOpen){
+		CheckCursorInButtonsConfirm();
+ 
+		//Take Focus Away From All Other buttons
+		return;
+	}
+ 
+	//Main
+	CheckCursorInButtonsMain();
+}
+ 
+void AFPSHUD::DrawToolTip(){
+	// If mouse is too far to right, draw from left instead
+	float xStart = MouseLocation.X + 150;
+	float yStart = MouseLocation.Y + 5;
+ 
+	// Out vars
+	float RV_xLength;
+	float RV_yLength;
+  
+	// Text Size
+	GetTextSize(
+		ActiveButton_Tip,
+		RV_xLength,
+		RV_yLength,
+		UE4Font,
+		DefaultFontScale * 2
+	);
+ 
+	// Decide Draw to Left or to the Right
+ 
+	//Draw to the Left
+	if (xStart + RV_xLength >= Canvas->SizeX - 40){
+		xStart -= 150 + 140 + 64 + RV_xLength;
+ 
+		//If Text is too long, bring it closer to the cursor
+		if (xStart < 33 ) xStart = 33;
+	}
+ 
+	//Background
+	DrawJoyRect(
+		xStart, yStart,
+		RV_xLength + 70,
+		80,
+		FLinearColor(0, 0, 1, 0.7) //alpha 0.7
+	);
+ 
+	//Tool Tip
+	DrawText(
+		ActiveButton_Tip,
+		LC_Pink,
+		xStart + 32, yStart + 20,
+		UE4Font,
+		DefaultFontScale * 2,
+		false		//scale position of message with HUD scale
+	);
+}
+
+void AFPSHUD::DrawHUD_DrawCursor(){
+	//Tool Tip
+	if (ActiveButton_Tip != "") DrawToolTip();
+ 
+	//Cursor Hovering in a Button?
+	if (CursorHoveringInButton){
+		//pointer tex found?
+		if (!CursorHoveringButton) return;
+    
+		DrawFullSizeTile(CursorHoveringButton, MouseLocation.X - CURSOR_DRAW_OFFSET, MouseLocation.Y - CURSOR_DRAW_OFFSET, FColor_White );
+	} else {
+		//cursor tex found?
+		if (!CursorMain) return;
+    
+		DrawFullSizeTile(CursorMain, MouseLocation.X - CURSOR_DRAW_OFFSET, MouseLocation.Y - CURSOR_DRAW_OFFSET, FColor_White );
+	}
+}
+ 
+void AFPSHUD::PlayerInputChecks(){
+	//check out this tutorial of mine for a list of all EKeys::
+	//http://forums.epicgames.com/threads/972861-Tutorials-C-for-UE4-Code-Samples-gt-gt-New-Video-Freeze-Render-When-Tabbed-Out?p=31660286&viewfull=1#post31660286
+ 
+	if (ThePC->WasInputKeyJustPressed(EKeys::Escape)){
+		SetCursorMoveOnly(false);
+		return;
+	}
+  
+	if (ThePC->WasInputKeyJustPressed(EKeys::F)){
+		SetCursorMoveOnly(!ThePC->IsLookInputIgnored());
+		return;
+	}
+  
+  if (ThePC->WasInputKeyJustPressed(EKeys::Tab)){
+    bShowMainMenu = !bShowMainMenu;
+    print("Tab pressed!", bShowMainMenu);
+    
+    return;
+  }
+  
+	if (ThePC->WasInputKeyJustPressed(EKeys::H)){
+		DontDrawHUD = !DontDrawHUD;
+		return;
+	}
+ 
+	//Confirm
+	if (ConfirmDialogOpen){
+		if (ThePC->WasInputKeyJustPressed(EKeys::Y)){
+			ThePC->ConsoleCommand("Exit");
+			//could replace with function based on confirm context
+ 
+			return;
+		}
+    
+		if(ThePC->WasInputKeyJustPressed(EKeys::N)){
+			ConfirmDialogOpen = false;
+			ButtonsConfirm.Empty(); //Buttons not needed anymore
+			//Cancel Confirm
+ 
+			return;
+		}
+	}
+}
+ 
+void AFPSHUD::DrawHUD_Reset(){
+	ActiveButton_Type = -1;
+	ActiveButton_Tip = "";
+	CursorHoveringInButton = false;
+}
+ 
+void AFPSHUD::DrawHUD(){
+	// Have PC for Input Checks and Mouse Cursor?
+	if (!ThePC){
+		// Attempt to Reacquire PC
+		ThePC = GetOwningPlayerController();
+ 
+		// Failed to find the PC
+		if (!ThePC) return;
+	}
+ 
+	// Multiplayer Safety Check
+	if (!ThePC->PlayerInput) return; //not valid for first seconds of a multiplayer client
+ 
+	// Player Input
+	PlayerInputChecks();
+ 
+	//Draw HUD?
+	if (DontDrawHUD) return;
+ 
+	//Super
+	Super::DrawHUD();
+ 
+	//No Canvas?
+	if (!Canvas) return;
+ 
+	//Reset States
+	DrawHUD_Reset();
+ 
+	//Get New Mouse Position
+	ThePC->GetMousePosition(MouseLocation.X, MouseLocation.Y);
+ 
+	//Cursor In Buttons
+	DrawHUD_CheckCursorInButtons();
+ 
+	//Draw Dialogs
+	DrawHUD_DrawDialogs();
+  
+  DrawFrames();
+  DrawPrintBox();
+  DrawMessageBox();
+  DrawMainMenu();
+  
+	//Draw Cursor
+	DrawHUD_DrawCursor();
+  
+  Startup();
+}
+
+void GetDisplay()
+{
+  print("Trying to get display.");
+}
