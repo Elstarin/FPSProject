@@ -30,7 +30,7 @@ DEFINE_LOG_CATEGORY_STATIC(Main, Warning, All);
 //   public:
 //     void callback(void){ callback_(); }
 //     void setCallback((*callback)(void));
-//     void addToEventSystem(int ID, EventSystem &eventSystem);
+//     void addToEventSystem(int32 ID, EventSystem &eventSystem);
 //   private:
 //     void (*callback_)(void);
 // };
@@ -38,13 +38,13 @@ DEFINE_LOG_CATEGORY_STATIC(Main, Warning, All);
 // class EventSystem
 // {
 // public:
-//     void register(int ID, Registration* registration);
-//     void unRegister(int ID, Registration* registration);
-//     void addNotificationToQueue(int ID);
-//     void addNotificationToSchedule(int ID, int notificationTime);
+//     void register(int32 ID, Registration* registration);
+//     void unRegister(int32 ID, Registration* registration);
+//     void addNotificationToQueue(int32 ID);
+//     void addNotificationToSchedule(int32 ID, int32 notificationTime);
 //     void processQueuedNotifications(void);
 //     void processNextScheduled(void);
-//     int getCurrentTime(void);
+//     int32 getCurrentTime(void);
 // private:
 //     //placeholder types
 //     <list> notificationQueue;
@@ -97,7 +97,7 @@ extern inline FString* convert(FString* x);
 extern inline FString convert(const char* x);
 extern inline FString convert(std::string x);
 extern inline FString convert(bool x);
-extern inline FString convert(int x);
+extern inline FString convert(int32 x);
 extern inline FString convert(int8 x);
 extern inline FString convert(int16 x);
 extern inline FString convert(int64 x);
@@ -139,7 +139,7 @@ void print(T value){
 
 template <typename T, typename... Args>
 void print(T value, Args... args){ // Recursive variadic function
-  // static const unsigned short int size = sizeof...(Arguments);
+  // static const unsigned short int32 size = sizeof...(Arguments);
   // <Args...>::name()
 
 	// Catch each value and store it up in printStr

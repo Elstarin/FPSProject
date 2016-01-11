@@ -2,6 +2,94 @@
 
 // KEYWORDS: AActor, UPrimitiveComponent, FHitResult, UParticleSystem, UParticleSystemComponent, TSubobjectPtr, NULL, AActor
 
+// A way to allocate space for a TArray when creating it. Just note that a TArray with a different allocator is a different type, so this one couldn't be passed as TArray<Shape*>
+/*
+  TArray<Shape*, TInlineAllocator<16>> MyShapeArray;
+*/
+
+// To solve the above, they mention using a template
+/*
+  template<typename AllocatorType>
+  int32 GetNumShapes(TArray<Shape*, AllocatorType>& ShapeArray)
+  {
+    return ShapeArray.Num();
+  }
+  
+  void TestCompile()
+  {
+  	TArray<Shape*> HeapShapeArray;
+  	TArray<Shape*, TInlineAllocator<16>> InlineShapeArray;
+  	
+  	FillShapeArray(HeapShapeArray);
+  	FillShapeArray(InlineShapeArray);
+  	
+  	// ok, compiler infers template type of allocator as FDefaultAllocator
+  	const int32 A = GetNumShapes(HeapShapeArray);
+  	
+  	// ok, compiler infers template type of allocator as TInlineAllocator<16>
+  	const int32 B = GetNumShapes(InlineShapeArray);
+  	
+  	// ok, explicit with template type, but not really necessary
+  	// or very reusable with hard-coded "16"
+  	const int32 C = GetNumShapes<TInlineAllocator<16>>(InlineShapeArray);
+  }
+*/
+
+// UE4 recommendation for iterating over a TMap
+/*
+  TMap<AActor*, FMyStruct> ActorStructs;
+  for (const auto& Entry : ActorStructs)
+  {
+    AActor* Actor = Entry.Key;
+    const FMyStruct& Data = Entry.Value;
+  }
+*/
+
+// UE4 recommendation for iterating over a TArray, they specifically mention that you usually want to capture the element as either a pointer or a reference to avoid it copying
+/*
+  for (auto* MyShape : MyShapeArray)
+  {
+    MyShape->Draw();
+  }
+*/
+
+// Reserve memory before doing a loop to add elements to an array to avoid it having to increase the amount of reserved memory multiple times
+/*
+  Result.Reserve(Result.Num() + N);
+  for (int32 Index=0; Index < N; Index++)
+  {
+    Result.Add(CharToCopy);
+  }
+*/
+
+// Always pass a TArray by reference, otherwise it will copy the whole array. Not positive this example is correct, I wrote it.
+/*
+  void ArrayFunc(TArray<char> &Result){};
+*/
+
+// Removing values from an array more efficiently
+/*
+  void RemoveEvenValues(TArray<int32>& Numbers)
+  {
+  	for (int32 Index = 0; Index < Numbers.Num(); Index++)
+  	{
+  		if (Numbers[Index] % 2 == 0)
+  		{
+  			Numbers.RemoveAtSwap(Index, 1, false);
+  			Index--;   // since we need to process this index again!
+  		}
+  	}
+  	
+  	// Optional: reclaim empty space after values have been removed
+  	Numbers.Shrink();
+  }
+*/
+
+//
+/*
+
+*/
+
 #include "FPSProject.h"
 #include "TimerSystem.h"
 #include "FPSHUD.h"
@@ -48,20 +136,51 @@ void timerCallback()
   // print("Timer called back!");
 }
 
+// TArray<Frame*> TestFrameList;
+// void CreateFrameList()
+// {
+//   int32 num = 100000;
+//
+//   TestFrameList.Reserve(num);
+//   for (int32 i = 1; i <= num; i++)
+//   {
+//     auto frame = Frame::CreateFrame("Frame1", "BACKGROUND", 0);
+//     TestFrameList.Emplace(frame);
+//   }
+// }
+
+// void IterateFrameList()
+// {
+//   for (int32 i = 0; i < TestFrameList.Num(); i++)
+//   {
+//     auto* f = TestFrameList[i];
+//   }
+//
+//   // for (auto& f : TestFrameList)
+//   // {
+//   //
+//   // }
+// }
+
 // void UMyStaticLibrary::profileCode()
 void UMyStaticLibrary::profileCode(UWorld* const World)
 {
-  // int loopNum = 100;
-  // int loopNum = 1000; // 1k
-  // int loopNum = 10000; // 10k
-  // int loopNum = 100000; // 100k
-  // int loopNum = 500000; // 500k
-  int loopNum = 1000000; // 1m
-  // int loopNum = 10000000; // 10m
-  // int loopNum = 100000000; // 100m
+  int32 loopNum = 1;
+  // loopNum = 100;
+  // loopNum = 1000; // 1k
+  // loopNum = 10000; // 10k
+  // loopNum = 100000; // 100k
+  // loopNum = 500000; // 500k
+  // loopNum = 1000000; // 1m
+  // loopNum = 10000000; // 10m
+  loopNum = 100000000; // 100m
   
-  if (true){ // Toggle this to easily disable profiling
-    print("Profiling... Iterations:", loopNum);
+  // auto frame = Frame::CreateFrame("Frame1", "BACKGROUND", 0);
+  
+  // auto lambda = [](){};
+  
+  if (false){ // Toggle this to easily disable profiling
+    // print("Profiling... Iterations:", loopNum);
     
     enum List
     {
@@ -86,25 +205,30 @@ void UMyStaticLibrary::profileCode(UWorld* const World)
       MOUSE_MOVEMENT,
     };
     
-    // TMap<int32, int32> TestMap;
-    //
-    // for (int i = 1; i <= 19; i++)
-    // {
-    //   TestMap.Emplace(i, i);
-    // }
-    
     // APlayerController* PlayerCon = UObject::GetOwningPlayerController();
     // auto PlayerCon = UGameplayStatics::GetPlayerController(World, 0);
     // auto PlayerCon = GetWorld()->GetFirstPlayerController();
     
-    // Code to test
-    auto start = TimerSystem::GetTime();
-    for (int i = 1; i <= loopNum; i++)
-    {
-      AFPSHUD::CheckAllKeys();
-    }
+    int32 length = 0;
     
-    print("Total MS:", (TimerSystem::GetTime() - start) * 1000.f);
+    // Code to test
+    double start = TimerSystem::GetTime();
+    for (int32 i = 1; i <= loopNum; i++)
+    {
+      
+    }
+    double stop = TimerSystem::GetTime();
+    
+    double totalMS = (stop - start) * 1000.f; // Total time in milliseconds
+    double MSper = totalMS / loopNum; // Milliseconds per iteration
+    double oneSecond = 1000.f / MSper; // How many iterations can be done in one second
+    double oneMS = oneSecond / 1000.f; // How many iterations can be done in one millisecond
+    
+    print("Total MS:", totalMS);
+    print("MS per:", MSper);
+    print("In 1 second:", oneSecond);
+    print("In 1 MS:", oneMS);
+    print(length);
   }
 }
 
@@ -143,7 +267,7 @@ inline FString convert(bool x){
 	}
 }
 
-inline FString convert(int x){
+inline FString convert(int32 x){
   return FString::FromInt(x);
 }
 

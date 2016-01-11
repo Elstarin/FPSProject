@@ -310,6 +310,7 @@ FORCEINLINE void VDrawTile(UTexture2D* tex, float x, float y, float screenX, flo
 public:
 	void DrawHUD_DrawDialogs();
 	
+	void CheckMouseoverFrames(Frame* f, int32 left, int32 right, int32 top, int32 bottom);
 	void DrawFrames();
 	void DrawMessageBox();
 	void DrawPrintBox();

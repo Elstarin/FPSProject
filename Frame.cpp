@@ -7,6 +7,7 @@ int32 Frame::count = 0;
 TMap<FString, Frame::Strata> Frame::StrataMap;
 const FString Frame::strataList[5] = {"BACKGROUND", "LOW", "MEDIUM", "HIGH", "OVERLAY"};
 
+TArray<Frame*> Frame::FrameList;
 TArray<Frame*> Frame::Level::FrameList;
 TArray<Frame::Scripts> Frame::OnUpdateList;
 TMap<int32, Frame::Level> Frame::Strata::LevelMap;
@@ -50,16 +51,16 @@ Frame::~Frame()
 }
 
 // Get functions /////////////////////////////////////////////////////////////
-int32 Frame::GetWidth() const {return w;}
-int32 Frame::GetHeight() const {return h;}
-int32 Frame::GetSize() const {return w, h;}
-int32 Frame::GetX() const {return x;}
-int32 Frame::GetY() const {return y;}
-int32 Frame::GetPosition() const {return x, y;}
-int32 Frame::GetColorInt() const {return r, g, b, a;}
+float Frame::GetWidth() const {return w;}
+float Frame::GetHeight() const {return h;}
+float Frame::GetSize() const {return w, h;}
+float Frame::GetX() const {return x;}
+float Frame::GetY() const {return y;}
+float Frame::GetPosition() const {return x, y;}
+float Frame::GetColorInt() const {return r, g, b, a;}
 FLinearColor Frame::GetColor() const {return FLinearColor(r, g, b, a);}
-int32 Frame::GetAlpha() const {return a;}
-int32 Frame::GetScale() const {return scale;}
+float Frame::GetAlpha() const {return a;}
+float Frame::GetScale() const {return scale;}
 int32 Frame::GetLevel() const {return level;}
 bool Frame::IsShown() const {return shown;}
 bool Frame::GetMouseOver() const {return mouseOver;}
@@ -71,87 +72,46 @@ Frame* Frame::GetParent() const {return parent;}
 // END get functions ///////////////////////////////////////////////////////////
 
 // Set functions ///////////////////////////////////////////////////////////////
-void Frame::SetWidth(int32 nW){w = nW;}
-void Frame::SetHeight(int32 nH){h = nH;}
-void Frame::SetSize(int32 nW, int32 nH){w = nW; h = nH;}
-void Frame::SetX(int32 nX){x = nX;}
-void Frame::SetY(int32 nY){y = nY;}
-void Frame::SetPosition(int32 nX, int32 nY){x = nX; y = nY;}
-void Frame::SetScale(int32 nScale){scale = nScale;}
+void Frame::SetWidth(float nW){w = nW;}
+void Frame::SetHeight(float nH){h = nH;}
+void Frame::SetSize(float nW, float nH){w = nW; h = nH;}
+void Frame::SetX(float nX){x = nX;}
+void Frame::SetY(float nY){y = nY;}
+void Frame::SetPosition(float nX, float nY){x = nX; y = nY;}
+void Frame::SetScale(float nScale){scale = nScale;}
 void Frame::SetName(FString nName){name = nName;}
 void Frame::SetType(FString nType){type = nType;}
 void Frame::SetShown(bool nVisibility){shown = nVisibility;}
 void Frame::SetMouseOver(bool nMouseOver){mouseOver = nMouseOver;}
 
-void Frame::SetColor(int32 nR, int32 nG, int32 nB, int32 nA)
+void Frame::SetColor(float nR, float nG, float nB, float nA)
 {
-  if ((0.f >= nR) && (nR > 1.f)) // It is between 0 and 1
-  {
-    r = nR;
-  }
-  else if (0.f >= nR) // To low
-  {
-    r = 0.f;
-  }
-  else if (nR >= 1.f) // To high
-  {
-    r = 1.f;
-  }
+  // All of these default to 1.f if they are not supplied.
   
-  if ((0.f >= nG) && (nG > 1.f))
-  {
-    g = nG;
-  }
-  else if (0.f >= nG)
-  {
-    g = 0.f;
-  }
-  else if (nG >= 1.f)
-  {
-    g = 1.f;
-  }
+  if ((nR >= 0.f) && (1.f >= nR)) r = nR; // It is between 0 and 1
+  else if (0.f > nR) r = 0.f; // Less than 0, set it to 0
+  else if (nR > 1.f) r = 1.f; // More than 1, set it to 1
   
-  if ((0.f >= nB) && (nB > 1.f))
-  {
-    b = nB;
-  }
-  else if (0.f >= nB)
-  {
-    b = 0.f;
-  }
-  else if (nB >= 1.f)
-  {
-    b = 1.f;
-  }
+  if ((nG >= 0.f) && (1.f >= nG)) g = nG;
+  else if (0.f > nG) g = 0.f;
+  else if (nG > 1.f) g = 1.f;
   
-  if ((0.f >= nA) && (nA > 1.f))
-  {
-    a = nA;
-  }
-  else if (0.f >= nA)
-  {
-    a = 0.f;
-  }
-  else if (nA >= 1.f)
-  {
-    a = 1.f;
-  }
+  if ((nB >= 0.f) && (1.f >= nB)) b = nB;
+  else if (0.f > nB) b = 0.f;
+  else if (nB > 1.f) b = 1.f;
+  
+  if ((nA >= 0.f) && (1.f >= nA)) a = nA;
+  else if (0.f > nA) a = 0.f;
+  else if (nA > 1.f) a = 1.f;
 }
 
-void Frame::SetAlpha(int32 nA)
+void Frame::SetAlpha(float nA)
 {
-  if ((0.f >= nA) && (nA > 1.f)) // It is between 0 and 1
-  {
-    a = nA;
-  }
-  else if (0.f >= nA) // To low
-  {
-    a = 0.f;
-  }
-  else if (nA >= 1.f) // To high
-  {
-    a = 1.f;
-  }
+  // Defaults to 1.f if not supplied
+  
+  if ((nA >= 0.f) && (1.f >= nA)) a = nA; // It is between 0 and 1
+  else if (0.f > nA) a = 0.f; // Less than 0, set it to 0
+  else if (nA > 1.f) a = 1.f; // More than 1, set it to 1
 }
 
 void Frame::SetLevel(int32 nLevel)
@@ -202,140 +162,367 @@ void Frame::SetScript(ScriptTypes script, void (*func)())
 }
 // END Set functions ///////////////////////////////////////////////////////////
 
-void Frame::RegisterEvent(EventEnum event)
-{
-  Frame* f = this;
-  switch (event)
-  {
-    case MOUSE_ENTER:
-      print("Registering MOUSE_ENTER", f->GetName());
-      MOUSE_ENTER_list.Emplace(f);
-      break;
-    case MOUSE_EXIT:
-      print("Registering MOUSE_EXIT", f->GetName());
-      MOUSE_EXIT_list.Emplace(f);
-      break;
-    case GAME_START:
-      GAME_START_list.Emplace(f);
-      break;
-    case UPDATE:
-      UPDATE_list.Emplace(f);
-      break;
-    case FRAME_CREATED:
-      FRAME_CREATED_list.Emplace(f);
-      break;
-    case WINDOW_FOCUS:
-      WINDOW_FOCUS_list.Emplace(f);
-      break;
-    case KEY_DOWN:
-      KEY_DOWN_list.Emplace(f);
-      break;
-    case KEY_UP:
-      KEY_UP_list.Emplace(f);
-      break;
-    case GAME_QUIT:
-      GAME_QUIT_list.Emplace(f);
-      break;
-    case MOUSE_CLICKED_DOWN:
-      MOUSE_CLICKED_DOWN_list.Emplace(f);
-      break;
-    case MOUSE_CLICKED_UP:
-      MOUSE_CLICKED_UP_list.Emplace(f);
-      break;
-    case MOUSE_MOVEMENT:
-      MOUSE_MOVEMENT_list.Emplace(f);
-      break;
-    default:
-      print("No event: ", event);
-      break;
-  }
-}
+// void Frame::RegisterEvent(EventEnum event)
+// {
+//   Frame* f = this;
+//   switch (event)
+//   {
+//   case EventEnum::MOUSE_ENTER:
+//       MOUSE_ENTER_list.Emplace(f);
+//       break;
+//     case EventEnum::MOUSE_EXIT:
+//       MOUSE_EXIT_list.Emplace(f);
+//       break;
+//     case EventEnum::GAME_START:
+//       GAME_START_list.Emplace(f);
+//       break;
+//     case EventEnum::UPDATE:
+//       UPDATE_list.Emplace(f);
+//       break;
+//     case EventEnum::FRAME_CREATED:
+//       FRAME_CREATED_list.Emplace(f);
+//       break;
+//     case EventEnum::WINDOW_FOCUS:
+//       WINDOW_FOCUS_list.Emplace(f);
+//       break;
+//     case EventEnum::KEY_DOWN:
+//       KEY_DOWN_list.Emplace(f);
+//       break;
+//     case EventEnum::KEY_UP:
+//       KEY_UP_list.Emplace(f);
+//       break;
+//     case EventEnum::GAME_QUIT:
+//       GAME_QUIT_list.Emplace(f);
+//       break;
+//     case EventEnum::MOUSE_CLICKED_DOWN:
+//       MOUSE_CLICKED_DOWN_list.Emplace(f);
+//       break;
+//     case EventEnum::MOUSE_CLICKED_UP:
+//       MOUSE_CLICKED_UP_list.Emplace(f);
+//       break;
+//     case EventEnum::MOUSE_MOVEMENT:
+//       MOUSE_MOVEMENT_list.Emplace(f);
+//       break;
+//     default:
+//       print("No event: ", event);
+//       break;
+//   }
+// }
 
 void Frame::OnEvent(void (*func)(Frame*, EventEnum))
 {
   OnEventFunc = func;
 }
 
+// bool bEventList[] = {
+//   MOUSE_ENTER,
+//   MOUSE_EXIT,
+//   GAME_START,
+//   GAME_LOAD,
+//   LOAD_FILE,
+//   DRAWING,
+//   UPDATE,
+//   FRAME_CREATED,
+//   MOUSE_DOWN,
+//   WINDOW_FOCUS,
+//   WINDOW_VISIBLE,
+//   KEY_DOWN,
+//   KEY_UP,
+//   GAME_QUIT,
+//   SCORE_UPDATE,
+//   MOUSE_CLICKED_DOWN,
+//   MOUSE_CLICKED_UP,
+//   ZEPPLIN_FALLING,
+//   MOUSE_MOVEMENT,
+//
+//   // Key events
+//   KEY_DOWN_MouseX,
+//   KEY_UP_MouseX,
+//   KEY_DOWN_MouseY,
+//   KEY_UP_MouseY,
+//   KEY_DOWN_MouseScrollUp,
+//   KEY_UP_MouseScrollUp,
+//   KEY_DOWN_MouseScrollDown,
+//   KEY_UP_MouseScrollDown,
+//   KEY_DOWN_MouseWheelAxis,
+//   KEY_UP_MouseWheelAxis,
+//
+//   KEY_DOWN_LeftMouseButton,
+//   KEY_UP_LeftMouseButton,
+//   KEY_DOWN_RightMouseButton,
+//   KEY_UP_RightMouseButton,
+//   KEY_DOWN_MiddleMouseButton,
+//   KEY_UP_MiddleMouseButton,
+//   KEY_DOWN_ThumbMouseButton,
+//   KEY_UP_ThumbMouseButton,
+//   KEY_DOWN_ThumbMouseButton2,
+//   KEY_UP_ThumbMouseButton2,
+//
+//   KEY_DOWN_BackSpace,
+//   KEY_UP_BackSpace,
+//   KEY_DOWN_Tab,
+//   KEY_UP_Tab,
+//   KEY_DOWN_Enter,
+//   KEY_UP_Enter,
+//   KEY_DOWN_Pause,
+//   KEY_UP_Pause,
+//
+//   KEY_DOWN_CapsLock,
+//   KEY_UP_CapsLock,
+//   KEY_DOWN_Escape,
+//   KEY_UP_Escape,
+//   KEY_DOWN_SpaceBar,
+//   KEY_UP_SpaceBar,
+//   KEY_DOWN_PageUp,
+//   KEY_UP_PageUp,
+//   KEY_DOWN_PageDown,
+//   KEY_UP_PageDown,
+//   KEY_DOWN_End,
+//   KEY_UP_End,
+//   KEY_DOWN_Home,
+//   KEY_UP_Home,
+//
+//   KEY_DOWN_Left,
+//   KEY_UP_Left,
+//   KEY_DOWN_Up,
+//   KEY_UP_Up,
+//   KEY_DOWN_Right,
+//   KEY_UP_Right,
+//   KEY_DOWN_Down,
+//   KEY_UP_Down,
+//
+//   KEY_DOWN_Insert,
+//   KEY_UP_Insert,
+//   KEY_DOWN_Delete,
+//   KEY_UP_Delete,
+//
+//   KEY_DOWN_Zero,
+//   KEY_UP_Zero,
+//   KEY_DOWN_One,
+//   KEY_UP_One,
+//   KEY_DOWN_Two,
+//   KEY_UP_Two,
+//   KEY_DOWN_Three,
+//   KEY_UP_Three,
+//   KEY_DOWN_Four,
+//   KEY_UP_Four,
+//   KEY_DOWN_Five,
+//   KEY_UP_Five,
+//   KEY_DOWN_Six,
+//   KEY_UP_Six,
+//   KEY_DOWN_Seven,
+//   KEY_UP_Seven,
+//   KEY_DOWN_Eight,
+//   KEY_UP_Eight,
+//   KEY_DOWN_Nine,
+//   KEY_UP_Nine,
+//
+//   KEY_DOWN_A,
+//   KEY_UP_A,
+//   KEY_DOWN_B,
+//   KEY_UP_B,
+//   KEY_DOWN_C,
+//   KEY_UP_C,
+//   KEY_DOWN_D,
+//   KEY_UP_D,
+//   KEY_DOWN_E,
+//   KEY_UP_E,
+//   KEY_DOWN_F,
+//   KEY_UP_F,
+//   KEY_DOWN_G,
+//   KEY_UP_G,
+//   KEY_DOWN_H,
+//   KEY_UP_H,
+//   KEY_DOWN_I,
+//   KEY_UP_I,
+//   KEY_DOWN_J,
+//   KEY_UP_J,
+//   KEY_DOWN_K,
+//   KEY_UP_K,
+//   KEY_DOWN_L,
+//   KEY_UP_L,
+//   KEY_DOWN_M,
+//   KEY_UP_M,
+//   KEY_DOWN_N,
+//   KEY_UP_N,
+//   KEY_DOWN_O,
+//   KEY_UP_O,
+//   KEY_DOWN_P,
+//   KEY_UP_P,
+//   KEY_DOWN_Q,
+//   KEY_UP_Q,
+//   KEY_DOWN_R,
+//   KEY_UP_R,
+//   KEY_DOWN_S,
+//   KEY_UP_S,
+//   KEY_DOWN_T,
+//   KEY_UP_T,
+//   KEY_DOWN_U,
+//   KEY_UP_U,
+//   KEY_DOWN_V,
+//   KEY_UP_V,
+//   KEY_DOWN_W,
+//   KEY_UP_W,
+//   KEY_DOWN_X,
+//   KEY_UP_X,
+//   KEY_DOWN_Y,
+//   KEY_UP_Y,
+//   KEY_DOWN_Z,
+//   KEY_UP_Z,
+// };
+
 void Frame::Fire(EventEnum event)
 {
-  // This function is called from various places all around the code
-  // It is given an event from an enum list
-  // It figures out which TArray of registered frames belongs with that event
-  // Then loops through each registered frame, calling its OnEventFunc function
-  
   switch (event)
   {
-    case MOUSE_ENTER:
-      if (MOUSE_ENTER_list.Num() > 0)
-        for (int i = MOUSE_ENTER_list.Num() - 1; i >= 0; --i)
-          // Make sure that this is the actual frame that's moused over
-          // Otherwise it will react to any frame registered
-          if (true == MOUSE_ENTER_list[i]->GetMouseOver())
-            {MOUSE_ENTER_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+    case EventEnum::MOUSE_ENTER:
+      for (int32 i = 0; i < FrameList.Num(); i++)
+        if (FrameList[i]->MOUSE_ENTER) FrameList[i]->MOUSE_ENTER();
       break;
-    case MOUSE_EXIT:
-      if (MOUSE_EXIT_list.Num() > 0)
-        for (int i = MOUSE_EXIT_list.Num() - 1; i >= 0; --i)
-          // True because the event is fired BEFORE it's changed to false
-          // Otherwise it will react to the wrong frames
-          if (true == MOUSE_ENTER_list[i]->GetMouseOver())
-            {MOUSE_EXIT_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+    case EventEnum::MOUSE_EXIT:
+      for (int32 i = 0; i < FrameList.Num(); i++)
+        if (FrameList[i]->MOUSE_EXIT) FrameList[i]->MOUSE_EXIT();
       break;
-    case GAME_START:
-      if (GAME_START_list.Num() > 0)
-        for (int i = GAME_START_list.Num() - 1; i >= 0; --i)
-            {GAME_START_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+    case EventEnum::UPDATE:
+      for (int32 i = 0; i < FrameList.Num(); i++)
+        if (FrameList[i]->UPDATE) FrameList[i]->UPDATE();
       break;
-    case UPDATE:
-      if (UPDATE_list.Num() > 0)
-        for (int i = UPDATE_list.Num() - 1; i >= 0; --i)
-            {UPDATE_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+    case EventEnum::FRAME_CREATED:
+      for (int32 i = 0; i < FrameList.Num(); i++)
+        if (FrameList[i]->FRAME_CREATED) FrameList[i]->FRAME_CREATED();
       break;
-    case FRAME_CREATED:
-      if (FRAME_CREATED_list.Num() > 0)
-        for (int i = FRAME_CREATED_list.Num() - 1; i >= 0; --i)
-            {FRAME_CREATED_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+    case EventEnum::WINDOW_FOCUS_GAINED:
+      for (int32 i = 0; i < FrameList.Num(); i++)
+        if (FrameList[i]->WINDOW_FOCUS_GAINED) FrameList[i]->WINDOW_FOCUS_GAINED();
       break;
-    case WINDOW_FOCUS:
-      if (WINDOW_FOCUS_list.Num() > 0)
-        for (int i = WINDOW_FOCUS_list.Num() - 1; i >= 0; --i)
-            {WINDOW_FOCUS_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+    case EventEnum::WINDOW_FOCUS_LOST:
+      for (int32 i = 0; i < FrameList.Num(); i++)
+        if (FrameList[i]->WINDOW_FOCUS_LOST) FrameList[i]->WINDOW_FOCUS_LOST();
       break;
-    case KEY_DOWN:
-      if (KEY_DOWN_list.Num() > 0)
-        for (int i = KEY_DOWN_list.Num() - 1; i >= 0; --i)
-            {KEY_DOWN_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+    case EventEnum::KEY_DOWN:
+      for (int32 i = 0; i < FrameList.Num(); i++)
+        if (FrameList[i]->KEY_DOWN) FrameList[i]->KEY_DOWN();
       break;
-    case KEY_UP:
-      if (KEY_UP_list.Num() > 0)
-        for (int i = KEY_UP_list.Num() - 1; i >= 0; --i)
-            {KEY_UP_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+    case EventEnum::KEY_UP:
+      for (int32 i = 0; i < FrameList.Num(); i++)
+        if (FrameList[i]->KEY_UP) FrameList[i]->KEY_UP();
       break;
-    case GAME_QUIT:
-      if (GAME_QUIT_list.Num() > 0)
-        for (int i = GAME_QUIT_list.Num() - 1; i >= 0; --i)
-            {GAME_QUIT_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+    case EventEnum::GAME_START:
+      for (int32 i = 0; i < FrameList.Num(); i++)
+        if (FrameList[i]->GAME_START) FrameList[i]->GAME_START();
       break;
-    case MOUSE_CLICKED_DOWN:
-      if (MOUSE_CLICKED_DOWN_list.Num() > 0)
-        for (int i = MOUSE_CLICKED_DOWN_list.Num() - 1; i >= 0; --i)
-            {MOUSE_CLICKED_DOWN_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+    case EventEnum::GAME_PAUSE:
+      for (int32 i = 0; i < FrameList.Num(); i++)
+        if (FrameList[i]->GAME_PAUSE) FrameList[i]->GAME_PAUSE();
       break;
-    case MOUSE_CLICKED_UP:
-      if (MOUSE_CLICKED_UP_list.Num() > 0)
-        for (int i = MOUSE_CLICKED_UP_list.Num() - 1; i >= 0; --i)
-            {MOUSE_CLICKED_UP_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+    case EventEnum::GAME_STOP:
+      for (int32 i = 0; i < FrameList.Num(); i++)
+        if (FrameList[i]->GAME_STOP) FrameList[i]->GAME_STOP();
       break;
-    case MOUSE_MOVEMENT:
-      if (MOUSE_MOVEMENT_list.Num() > 0)
-        for (int i = MOUSE_MOVEMENT_list.Num() - 1; i >= 0; --i)
-            {MOUSE_MOVEMENT_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+    case EventEnum::MOUSE_CLICKED_DOWN:
+      for (int32 i = 0; i < FrameList.Num(); i++)
+        if (FrameList[i]->MOUSE_CLICKED_DOWN) FrameList[i]->MOUSE_CLICKED_DOWN();
+      break;
+    case EventEnum::MOUSE_CLICKED_UP:
+      for (int32 i = 0; i < FrameList.Num(); i++)
+        if (FrameList[i]->MOUSE_CLICKED_UP) FrameList[i]->MOUSE_CLICKED_UP();
+      break;
+    case EventEnum::MOUSE_MOVEMENT:
+      for (int32 i = 0; i < FrameList.Num(); i++)
+        if (FrameList[i]->MOUSE_MOVEMENT) FrameList[i]->MOUSE_MOVEMENT();
       break;
     default:
-      print("No event: ", event);
       break;
   }
 }
+
+// void Frame::Fire(EventEnum event)
+// {
+//   // This function is called from various places all around the code
+//   // It is given an event from an enum list
+//   // It figures out which TArray of registered frames belongs with that event
+//   // Then loops through each registered frame, calling its OnEventFunc function
+//
+//   // TArray<EventEnum> eventArray;
+//   //
+//   // for (int32 i = 0; i < ARRAY_COUNT(bEventList); i++)
+//   // {
+//   //   bEventList[i] = false;
+//   // }
+//
+//   switch (event)
+//   {
+//     case EventEnum::MOUSE_ENTER:
+//       if (MOUSE_ENTER_list.Num() > 0)
+//         for (int32 i = MOUSE_ENTER_list.Num() - 1; i >= 0; --i)
+//           // Make sure that this is the actual frame that's moused over
+//           // Otherwise it will react to any frame registered
+//           if (true == MOUSE_ENTER_list[i]->GetMouseOver())
+//             {MOUSE_ENTER_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+//       break;
+//     case EventEnum::MOUSE_EXIT:
+//       if (MOUSE_EXIT_list.Num() > 0)
+//         for (int32 i = MOUSE_EXIT_list.Num() - 1; i >= 0; --i)
+//           // True because the event is fired BEFORE it's changed to false
+//           // Otherwise it will react to the wrong frames
+//           if (true == MOUSE_ENTER_list[i]->GetMouseOver())
+//             {MOUSE_EXIT_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+//       break;
+//     case EventEnum::GAME_START:
+//       if (GAME_START_list.Num() > 0)
+//         for (int32 i = GAME_START_list.Num() - 1; i >= 0; --i)
+//             {GAME_START_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+//       break;
+//     case EventEnum::UPDATE:
+//       if (UPDATE_list.Num() > 0)
+//         for (int32 i = UPDATE_list.Num() - 1; i >= 0; --i)
+//             {UPDATE_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+//       break;
+//     case EventEnum::FRAME_CREATED:
+//       if (FRAME_CREATED_list.Num() > 0)
+//         for (int32 i = FRAME_CREATED_list.Num() - 1; i >= 0; --i)
+//             {FRAME_CREATED_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+//       break;
+//     case EventEnum::WINDOW_FOCUS:
+//       if (WINDOW_FOCUS_list.Num() > 0)
+//         for (int32 i = WINDOW_FOCUS_list.Num() - 1; i >= 0; --i)
+//             {WINDOW_FOCUS_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+//       break;
+//     case EventEnum::KEY_DOWN:
+//       if (KEY_DOWN_list.Num() > 0)
+//         for (int32 i = KEY_DOWN_list.Num() - 1; i >= 0; --i)
+//             {KEY_DOWN_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+//       break;
+//     case EventEnum::KEY_UP:
+//       if (KEY_UP_list.Num() > 0)
+//         for (int32 i = KEY_UP_list.Num() - 1; i >= 0; --i)
+//             {KEY_UP_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+//       break;
+//     case EventEnum::GAME_QUIT:
+//       if (GAME_QUIT_list.Num() > 0)
+//         for (int32 i = GAME_QUIT_list.Num() - 1; i >= 0; --i)
+//             {GAME_QUIT_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+//       break;
+//     case EventEnum::MOUSE_CLICKED_DOWN:
+//       if (MOUSE_CLICKED_DOWN_list.Num() > 0)
+//         for (int32 i = MOUSE_CLICKED_DOWN_list.Num() - 1; i >= 0; --i)
+//             {MOUSE_CLICKED_DOWN_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+//       break;
+//     case EventEnum::MOUSE_CLICKED_UP:
+//       if (MOUSE_CLICKED_UP_list.Num() > 0)
+//         for (int32 i = MOUSE_CLICKED_UP_list.Num() - 1; i >= 0; --i)
+//             {MOUSE_CLICKED_UP_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+//       break;
+//     case EventEnum::MOUSE_MOVEMENT:
+//       if (MOUSE_MOVEMENT_list.Num() > 0)
+//         for (int32 i = MOUSE_MOVEMENT_list.Num() - 1; i >= 0; --i)
+//             {MOUSE_MOVEMENT_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
+//       break;
+//     default:
+//       print("No event: ", event);
+//       break;
+//   }
+// }
 
 void Frame::IterateScriptArrays()
 {
@@ -358,13 +545,17 @@ void Frame::InitializeEventList()
   EventList.Emplace("GAME_QUIT");
 }
 
-Frame* Frame::CreateFrame(FString nName = "NAME", FString nStrata = "BACKGROUND", int32 nLevel = 0)
+Frame* Frame::CreateFrame(FString nName = "", FString nStrata = "BACKGROUND", int32 nLevel = 0)
 {
   Frame* f = new Frame();
+  FrameList.Emplace(f);
   
-  // delete f; // TODO: Move f to the right place.
+  // delete f; // TODO: Move this to the right place.
   
-  f->SetName(nName);
+  // If there wasn't a name passed, give it a default name
+  if (nName == "") f->SetName("Frame_" + FString::FromInt(count));
+  else f->SetName(nName);
+  
   f->strata = nStrata;
   f->level = nLevel;
 

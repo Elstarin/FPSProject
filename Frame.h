@@ -2,28 +2,27 @@
 
 #pragma once
 
+#include <functional>
+
 enum EventEnum
 {
 	MOUSE_ENTER,
 	MOUSE_EXIT,
-	GAME_START,
-	GAME_LOAD,
-	LOAD_FILE,
-	DRAWING,
-	UPDATE,
-	FRAME_CREATED,
-	MOUSE_DOWN,
-	WINDOW_FOCUS,
-	WINDOW_VISIBLE,
-	KEY_DOWN,
-	KEY_UP,
-	GAME_QUIT,
-	SCORE_UPDATE,
 	MOUSE_CLICKED_DOWN,
 	MOUSE_CLICKED_UP,
-	ZEPPLIN_FALLING,
+	UPDATE,
+	FRAME_CREATED,
+	GAME_START,
+	GAME_PAUSE,
+	GAME_STOP,
+	WINDOW_FOCUS_GAINED,
+	WINDOW_FOCUS_LOST,
+	KEY_DOWN,
+	KEY_UP,
+	DRAWING,
+	SCORE_UPDATE,
 	MOUSE_MOVEMENT,
-	
+
 	// Key events
 	KEY_DOWN_MouseX,
 	KEY_UP_MouseX,
@@ -35,7 +34,7 @@ enum EventEnum
 	KEY_UP_MouseScrollDown,
 	KEY_DOWN_MouseWheelAxis,
 	KEY_UP_MouseWheelAxis,
-	
+
 	KEY_DOWN_LeftMouseButton,
 	KEY_UP_LeftMouseButton,
 	KEY_DOWN_RightMouseButton,
@@ -46,7 +45,7 @@ enum EventEnum
 	KEY_UP_ThumbMouseButton,
 	KEY_DOWN_ThumbMouseButton2,
 	KEY_UP_ThumbMouseButton2,
-	
+
 	KEY_DOWN_BackSpace,
 	KEY_UP_BackSpace,
 	KEY_DOWN_Tab,
@@ -55,7 +54,7 @@ enum EventEnum
 	KEY_UP_Enter,
 	KEY_DOWN_Pause,
 	KEY_UP_Pause,
-	
+
 	KEY_DOWN_CapsLock,
 	KEY_UP_CapsLock,
 	KEY_DOWN_Escape,
@@ -70,7 +69,7 @@ enum EventEnum
 	KEY_UP_End,
 	KEY_DOWN_Home,
 	KEY_UP_Home,
-	
+
 	KEY_DOWN_Left,
 	KEY_UP_Left,
 	KEY_DOWN_Up,
@@ -79,12 +78,12 @@ enum EventEnum
 	KEY_UP_Right,
 	KEY_DOWN_Down,
 	KEY_UP_Down,
-	
+
 	KEY_DOWN_Insert,
 	KEY_UP_Insert,
 	KEY_DOWN_Delete,
 	KEY_UP_Delete,
-	
+
 	KEY_DOWN_Zero,
 	KEY_UP_Zero,
 	KEY_DOWN_One,
@@ -105,7 +104,7 @@ enum EventEnum
 	KEY_UP_Eight,
 	KEY_DOWN_Nine,
 	KEY_UP_Nine,
-	
+
 	KEY_DOWN_A,
 	KEY_UP_A,
 	KEY_DOWN_B,
@@ -158,7 +157,7 @@ enum EventEnum
 	KEY_UP_Y,
 	KEY_DOWN_Z,
 	KEY_UP_Z,
-	
+
 	KEY_DOWN_NumPadZero,
 	KEY_UP_NumPadZero,
 	KEY_DOWN_NumPadOne,
@@ -179,7 +178,7 @@ enum EventEnum
 	KEY_UP_NumPadEight,
 	KEY_DOWN_NumPadNine,
 	KEY_UP_NumPadNine,
-	
+
 	KEY_DOWN_Multiply,
 	KEY_UP_Multiply,
 	KEY_DOWN_Add,
@@ -190,7 +189,7 @@ enum EventEnum
 	KEY_UP_Decimal,
 	KEY_DOWN_Divide,
 	KEY_UP_Divide,
-	
+
 	KEY_DOWN_F1,
 	KEY_UP_F1,
 	KEY_DOWN_F2,
@@ -215,13 +214,13 @@ enum EventEnum
 	KEY_UP_F11,
 	KEY_DOWN_F12,
 	KEY_UP_F12,
-	
+
 	KEY_DOWN_NumLock,
 	KEY_UP_NumLock,
-	
+
 	KEY_DOWN_ScrollLock,
 	KEY_UP_ScrollLock,
-	
+
 	KEY_DOWN_LeftShift,
 	KEY_UP_LeftShift,
 	KEY_DOWN_RightShift,
@@ -238,7 +237,7 @@ enum EventEnum
 	KEY_UP_LeftCommand,
 	KEY_DOWN_RightCommand,
 	KEY_UP_RightCommand,
-	
+
 	KEY_DOWN_Semicolon,
 	KEY_UP_Semicolon,
 	KEY_DOWN_Equals,
@@ -269,7 +268,7 @@ enum EventEnum
 	KEY_UP_Apostrophe,
 	KEY_DOWN_Quote,
 	KEY_UP_Quote,
-	
+
 	KEY_DOWN_Asterix,
 	KEY_UP_Asterix,
 	KEY_DOWN_Ampersand,
@@ -282,7 +281,7 @@ enum EventEnum
 	KEY_UP_Exclamation,
 	KEY_DOWN_Colon,
 	KEY_UP_Colon,
-	
+
 	KEY_DOWN_A_AccentGrave,
 	KEY_UP_A_AccentGrave,
 	KEY_DOWN_E_AccentGrave,
@@ -317,11 +316,70 @@ class FrameText
  */
 class FPSPROJECT_API Frame
 {
+	// Sockets
 	private:
-		int32 w, h;
-		int32 x, y;
-		int32 r, g, b, a;
-		int32 scale;
+		typedef void (*FuncType)();
+		void (*MOUSE_ENTER)();
+		void (*MOUSE_EXIT)();
+		void (*MOUSE_CLICKED_DOWN)();
+		void (*MOUSE_CLICKED_UP)();
+		void (*UPDATE)();
+		void (*FRAME_CREATED)();
+		void (*WINDOW_FOCUS_GAINED)();
+		void (*WINDOW_FOCUS_LOST)();
+		void (*KEY_DOWN)();
+		void (*KEY_UP)();
+		void (*GAME_START)();
+		void (*GAME_PAUSE)();
+		void (*GAME_STOP)();
+		void (*MOUSE_MOVEMENT)();
+	public:
+		void Set_MOUSE_ENTER(FuncType func){MOUSE_ENTER = func;}
+		void Fire_MOUSE_ENTER() const {MOUSE_ENTER();}
+		
+		void Set_MOUSE_EXIT(FuncType func){MOUSE_EXIT = func;}
+		void Fire_MOUSE_EXIT() const {MOUSE_EXIT();}
+		
+		void Set_MOUSE_CLICKED_DOWN(FuncType func){MOUSE_CLICKED_DOWN = func;}
+		void Fire_MOUSE_CLICKED_DOWN() const {MOUSE_CLICKED_DOWN();}
+		
+		void Set_MOUSE_CLICKED_UP(FuncType func){MOUSE_CLICKED_UP = func;}
+		void Fire_MOUSE_CLICKED_UP() const {MOUSE_CLICKED_UP();}
+		
+		void Set_UPDATE(FuncType func){UPDATE = func;}
+		void Fire_UPDATE() const {UPDATE();}
+		
+		void Set_FRAME_CREATED(FuncType func){FRAME_CREATED = func;}
+		void Fire_FRAME_CREATED() const {FRAME_CREATED();}
+		
+		void Set_WINDOW_FOCUS_GAINED(FuncType func){WINDOW_FOCUS_GAINED = func;}
+		void Fire_WINDOW_FOCUS_GAINED() const {WINDOW_FOCUS_GAINED();}
+		
+		void Set_WINDOW_FOCUS_LOST(FuncType func){WINDOW_FOCUS_LOST = func;}
+		void Fire_WINDOW_FOCUS_LOST() const {WINDOW_FOCUS_LOST();}
+		
+		void Set_KEY_DOWN(FuncType func){KEY_DOWN = func;}
+		void Fire_KEY_DOWN() const {KEY_DOWN();}
+		
+		void Set_KEY_UP(FuncType func){KEY_UP = func;}
+		void Fire_KEY_UP() const {KEY_UP();}
+		
+		void Set_GAME_START(FuncType func){GAME_START = func;}
+		void Fire_GAME_START() const {GAME_START();}
+		
+		void Set_GAME_PAUSE(FuncType func){GAME_PAUSE = func;}
+		void Fire_GAME_PAUSE() const {GAME_PAUSE();}
+		
+		void Set_GAME_STOP(FuncType func){GAME_STOP = func;}
+		void Fire_GAME_STOP() const {GAME_STOP();}
+		
+		void Set_MOUSE_MOVEMENT(FuncType func){MOUSE_MOVEMENT = func;}
+		void Fire_MOUSE_MOVEMENT() const {MOUSE_MOVEMENT();}
+	private:
+		float w, h;
+		float x, y;
+		float r, g, b, a;
+		float scale;
 		int32 level;
 		bool shown;
 		bool mouseOver;
@@ -330,6 +388,7 @@ class FPSPROJECT_API Frame
 		FString name;
 		Frame* parent;
 		static int32 count;
+		static TArray<Frame*> FrameList; // All frames are stored in here
 		
 		enum ScriptTypes
 		{
@@ -594,6 +653,7 @@ class FPSPROJECT_API Frame
 		static TArray<Frame*> Frame::UP_LeftCommand_list;
 		static TArray<Frame*> Frame::DOWN_RightCommand_list;
 		static TArray<Frame*> Frame::UP_RightCommand_list;
+	public:
 		
     // void (*OnEventFunc)();
     void (*OnEventFunc)(Frame* f, EventEnum event);
@@ -608,16 +668,16 @@ class FPSPROJECT_API Frame
     static void InitializeEventList();
     
     // Get functions /////////////////////////////////////////////////////////////
-    int32 GetWidth() const;
-    int32 GetHeight() const;
-    int32 GetSize() const;
-    int32 GetX() const;
-    int32 GetY() const;
-    int32 GetPosition() const;
-    int32 GetColorInt() const;
+    float GetWidth() const;
+    float GetHeight() const;
+    float GetSize() const;
+    float GetX() const;
+    float GetY() const;
+    float GetPosition() const;
+    float GetColorInt() const;
     FLinearColor GetColor() const;
-    int32 GetAlpha() const;
-    int32 GetScale() const;
+    float GetAlpha() const;
+    float GetScale() const;
     int32 GetLevel() const;
     bool IsShown() const;
     bool GetMouseOver() const;
@@ -629,13 +689,13 @@ class FPSPROJECT_API Frame
     //////////////////////////////////////////////////////////////////////////////
     
     // Set functions /////////////////////////////////////////////////////////////
-    void SetWidth(int32 nW);
-    void SetHeight(int32 nH);
-    void SetSize(int32 nW, int32 nH);
-    void SetX(int32 nX);
-    void SetY(int32 nY);
-    void SetPosition(int32 nX, int32 nY);
-    void SetScale(int32 nScale);
+    void SetWidth(float nW);
+    void SetHeight(float nH);
+    void SetSize(float nW, float nH);
+    void SetX(float nX);
+    void SetY(float nY);
+    void SetPosition(float nX, float nY);
+    void SetScale(float nScale);
     void SetName(FString nName);
     void SetType(FString nType);
     void SetShown(bool nVisibility);
@@ -645,9 +705,9 @@ class FPSPROJECT_API Frame
     
     void OnEvent(void (*func)(Frame*, EventEnum));
     
-    void SetColor(int32 nR = 1.f, int32 nG = 1.f, int32 nB = 1.f, int32 nA = 1.f);
+    void SetColor(float nR = 1.f, float nG = 1.f, float nB = 1.f, float nA = 1.f);
     
-    void SetAlpha(int32 nA = 1.f);
+    void SetAlpha(float nA = 1.f);
     
     void SetLevel(int32 nLevel);
     
@@ -663,6 +723,7 @@ class FPSPROJECT_API Frame
     static void IterateScriptArrays();
 		
 		static void Fire(EventEnum event);
+		static void FireTest(EventEnum event);
 };
 
 

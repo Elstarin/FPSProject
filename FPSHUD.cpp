@@ -9,7 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "MyStaticLibrary.h"
 #include "TimerSystem.h"
-#include <functional>
+// #include <functional>
 // #include "MyStaticLibrary.h"
 
 // void AFPSHUD::DrawHUD(){
@@ -174,7 +174,7 @@ FString AFPSHUD::EscapeSequences(int32 searchNum, FString str)
   
   // Color sequence
   if (arr[index] == 'c'){
-    int counter = 0;
+    int32 counter = 0;
     char hex[8] = {};
     
     // Go until the next closing sequence
@@ -203,7 +203,7 @@ void AFPSHUD::addMessage(Message msg)
 
 void AFPSHUD::DrawMessageBox()
 {
-  for (int i = messages.Num() - 1; i >= 0; i--)
+  for (int32 i = messages.Num() - 1; i >= 0; i--)
   {
     float outputWidth, outputHeight, pad = 10.f;
     
@@ -327,11 +327,88 @@ void AFPSHUD::DrawPrintBox()
 	// DrawJoyRect(Canvas->SizeX / 2 - 100, Canvas->SizeY / 2 - 50, 200, 100, FLinearColor(0, 0, 1, 0.2333));
 }
 
+class socket
+{
+public:
+  // Each frame will have its own array of sockets. When a function is assigned to a socket, it gets added into the array. If an event is for a specific frame, like MOUSE_ENTER, I can call Fire_MOUSE_ENTER directly. However, that will not work for something like GAME_LOAD which may have a lot of interested frames. So, there needs to be a second way of calling it that does not require the actual frame itself. A generic Fire function.
+  
+  // So, to be able to do that I need to be able to iterate through every frame that is registered for GAME_LOAD. It's easy enough to figure out if a frame is registered by checking if (GAME_LOAD), so does that mean I must iterate through every single frame when an event is fired?
+  
+  // How slow would this be?
+  
+	// void (*OnEvent)();
+	// void (*OnEvent)(int32);
+  
+  typedef void (*FuncType)();
+  
+  static TArray<FuncType> SocketList;
+  
+  void (*MOUSE_ENTER)();
+  void Set_MOUSE_ENTER(FuncType func){MOUSE_ENTER = func;}
+  void Fire_MOUSE_ENTER() const {MOUSE_ENTER();}
+  
+  void (*MOUSE_EXIT)();
+  void Set_MOUSE_EXIT(FuncType func){MOUSE_EXIT = func;}
+  void Fire_MOUSE_EXIT() const {MOUSE_EXIT();}
+  
+  void (*MOUSE_CLICKED_DOWN)();
+  void Set_MOUSE_CLICKED_DOWN(FuncType func){MOUSE_CLICKED_DOWN = func;}
+  void Fire_MOUSE_CLICKED_DOWN() const {MOUSE_CLICKED_DOWN();}
+  
+  void (*MOUSE_CLICKED_UP)();
+  void Set_MOUSE_CLICKED_UP(FuncType func){MOUSE_CLICKED_UP = func;}
+  void Fire_MOUSE_CLICKED_UP() const {MOUSE_CLICKED_UP();}
+  
+  void (*UPDATE)();
+  void (*KEY_DOWN)();
+  void (*KEY_UP)();
+  void (*GAME_LOAD)();
+  void (*GAME_EXIT)();
+  void (*MOUSE_MOVEMENT)();
+  
+  // FuncType sockets[2] = {
+  //   OnMouseEnter,
+  //   OnMouseExit
+  // };
+  
+  void InitializeSockets()
+  {
+    // SocketList.Emplace(OnMouseEnter);
+    // SocketList.Emplace(OnMouseExit);
+  }
+  
+  void CallEvent()
+  {
+    // OnMouseEnter();
+    // SocketList[0]->OnMouseEnter();
+    // SocketList[0].OnMouseEnter();
+    
+    // if (OnMouseEnter)
+    // {
+    //   print("Call worked!");
+    // }
+    //
+    // if (OnMouseExit)
+    // {
+    //   print("Second call worked!");
+    // }
+  }
+};
+
 void AFPSHUD::Startup()
 {
   static bool hasRun = false;
   if (hasRun) return;
   hasRun = true;
+  
+  // socket newSocket;
+  // newSocket.InitializeSockets();
+  
+  // newSocket.Set_MOUSE_ENTER([](){
+  //   print("MOUSE_ENTER");
+  // });
+  
+  // newSocket.Fire_MOUSE_ENTER();
   
   Frame::InitializeEventList();
   
@@ -345,23 +422,39 @@ void AFPSHUD::Startup()
   //   // print("Update...");
   // });
   
-  f1->RegisterEvent(MOUSE_ENTER);
-  f1->RegisterEvent(MOUSE_EXIT);
-  
-  f1->OnEvent([](auto f, auto event)
+  f1->Set_UPDATE([]()
   {
-    switch (event)
-    {
-    case MOUSE_ENTER:
-      f->SetColor(0.f, 0.f, 0.f, 1.f);
-      print("Mouse entered:", f->GetName());
-      break;
-    case MOUSE_EXIT:
-      f->SetColor(1.f, 1.f, 1.f, 1.f);
-      print("Mouse exited:", f->GetName());
-      break;
-    }
+    print("Update!");
   });
+  Frame::Fire(EventEnum::UPDATE);
+  
+  // f1->RegisterEvent(MOUSE_ENTER);
+  // f1->RegisterEvent(MOUSE_EXIT);
+  // f1->RegisterEvent(KEY_DOWN_LeftMouseButton);
+  // f1->RegisterEvent(KEY_UP_LeftMouseButton);
+  // f1->RegisterEvent(KEY_DOWN_RightMouseButton);
+  // f1->RegisterEvent(KEY_UP_RightMouseButton);
+  
+  // f1->OnEvent([](auto f, auto event)
+  // {
+  //   switch (event)
+  //   {
+  //   case MOUSE_ENTER:
+  //   {
+  //     float r = FMath::FRandRange(0, 1);
+  //     float g = FMath::FRandRange(0, 1);
+  //     float b = FMath::FRandRange(0, 1);
+  //
+  //     f->SetColor(r, g, b, 1.f);
+  //     print("MOUSE_ENTER", f->GetName(), f->GetColor());
+  //     break;
+  //   }
+  //   case MOUSE_EXIT:
+  //     f->SetColor(1.f, 1.f, 1.f, 1.f);
+  //     print("MOUSE_EXIT", f->GetName());
+  //     break;
+  //   }
+  // });
   
   auto f2 = Frame::CreateFrame("Frame2", "BACKGROUND", 0);
   f2->SetPosition(0, 0);
@@ -369,10 +462,34 @@ void AFPSHUD::Startup()
   f2->SetColor(0, 0, 0, 1);
 }
 
+void AFPSHUD::CheckMouseoverFrames(Frame* f, int32 left, int32 right, int32 top, int32 bottom)
+{
+  if ((MouseLocation.X >= left) &&
+      (MouseLocation.X <= right) &&
+      (MouseLocation.Y >= top) &&
+      (MouseLocation.Y <= bottom))
+  {
+    if (false == f->GetMouseOver())
+    {
+      f->SetMouseOver(true);
+      Frame::Fire(MOUSE_ENTER);
+    }
+  }
+  // MouseLocation check failed, make sure it's false
+  else if (true == f->GetMouseOver())
+  {
+    Frame::Fire(MOUSE_EXIT);
+    f->SetMouseOver(false);
+  }
+}
+
 void AFPSHUD::DrawFrames()
 {
   TimerSystem::IterateTimerArrays();
   Frame::IterateScriptArrays();
+  
+  // Update the mouse's position
+  PC->GetMousePosition(MouseLocation.X, MouseLocation.Y);
 
   if (!bDrawFrames) return; // If false, return
   
@@ -385,20 +502,24 @@ void AFPSHUD::DrawFrames()
 
   static float cWidth = Canvas->SizeX;
   static float cHeight = Canvas->SizeY;
-  
-  PC->GetMousePosition(MouseLocation.X, MouseLocation.Y);
 
-  for (auto& strata : Frame::strataList) // Run through each strata
+  // Run through each strata
+  for (auto& strata : Frame::strataList)
   {
-    if (Frame::StrataMap.Contains(strata)) // This strata has been added
+    // Has this strata been created?
+    if (Frame::StrataMap.Contains(strata))
     {
-      for (int32 i = -10; i <= 10; i++) // Run through all frame levels for this strata
+      // Run through all frame levels for this strata
+      for (int32 i = -10; i <= 10; i++)
       {
-        if (Frame::StrataMap[strata].LevelMap.Contains(i)) // There are frames for this level
+        // Check if each level contains any frames
+        if (Frame::StrataMap[strata].LevelMap.Contains(i))
         {
+          // Iterate through every frame in this level
           for (auto& f : Frame::StrataMap[strata].LevelMap[i].FrameList)
           {
-            if (true == f->IsShown()) // If not shown, don't draw it (obviously)
+            // If not shown, don't draw it (obviously)
+            if (true == f->IsShown())
             {
               frameX = f->GetX();
               frameY = f->GetY();
@@ -408,25 +529,7 @@ void AFPSHUD::DrawFrames()
               // If either are zero it won't be visible, so don't waste time drawing it
               if ((frameW > 0) && (frameH > 0))
               {
-                { // Check for mouseover
-                  if ((MouseLocation.X >= frameX) &&
-                      (MouseLocation.X <= (frameX + frameW)) &&
-                      (MouseLocation.Y >= frameY) &&
-                      (MouseLocation.Y <= (frameY + frameH)))
-                  {
-                    if (false == f->GetMouseOver())
-                    {
-                      f->SetMouseOver(true);
-                      Frame::Fire(MOUSE_ENTER);
-                    }
-                  }
-                  // MouseLocation check failed, make sure it's false
-                  else if (true == f->GetMouseOver())
-                  {
-                    Frame::Fire(MOUSE_EXIT);
-                    f->SetMouseOver(false);
-                  }
-                }
+                CheckMouseoverFrames(f, frameX, (frameX + frameW), frameY, (frameY + frameH));
                 
                 count++;
                 // Use a switch in here for category
@@ -614,7 +717,8 @@ void AFPSHUD::DrawConfirmButtons(){
 //===============
 // Cursor In Buttons
 //===============
-int32 AFPSHUD::CheckCursorInButton(const TArray<FJoyButtonStruct>& ButtonArray){
+int32 AFPSHUD::CheckCursorInButton(const TArray<FJoyButtonStruct>& ButtonArray)
+{
 	for (int32 b = 0; b < ButtonArray.Num(); b++){
 		CurCheckButton = &ButtonArray[b];
  
@@ -644,7 +748,8 @@ int32 AFPSHUD::CheckCursorInButton(const TArray<FJoyButtonStruct>& ButtonArray){
 }
  
 //Check Confirm
-void AFPSHUD::CheckCursorInButtonsConfirm(){
+void AFPSHUD::CheckCursorInButtonsConfirm()
+{
 	//Check Confirm Buttons
 	ClickedButtonType = CheckCursorInButton(ButtonsConfirm); //fills global ActiveButton_Type
  
@@ -914,9 +1019,11 @@ void AFPSHUD::DrawHUD_Reset(){
 	CursorHoveringInButton = false;
 }
  
-void AFPSHUD::DrawHUD(){
+void AFPSHUD::DrawHUD()
+{
 	// Have PC for Input Checks and Mouse Cursor?
-	if (!PC){
+	if (!PC)
+  {
 		// Attempt to Reacquire PC
 		PC = GetOwningPlayerController();
  
@@ -970,6 +1077,417 @@ void GetDisplay()
 
 APlayerController* AFPSHUD::PC;
 
+void CheckMouse(APlayerController* PC)
+{
+  if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton))
+    Frame::Fire(KEY_DOWN_LeftMouseButton);
+  if (PC->WasInputKeyJustReleased(EKeys::LeftMouseButton)){
+    float time = PC->GetInputKeyTimeDown(EKeys::LeftMouseButton);
+    Frame::Fire(KEY_UP_LeftMouseButton);}
+    
+  if (PC->WasInputKeyJustPressed(EKeys::RightMouseButton))
+    Frame::Fire(KEY_DOWN_RightMouseButton);
+  if (PC->WasInputKeyJustReleased(EKeys::RightMouseButton)){
+    float time = PC->GetInputKeyTimeDown(EKeys::RightMouseButton);
+    Frame::Fire(KEY_UP_RightMouseButton);}
+    
+  if (PC->WasInputKeyJustPressed(EKeys::MiddleMouseButton))
+    Frame::Fire(KEY_DOWN_MiddleMouseButton);
+  if (PC->WasInputKeyJustReleased(EKeys::MiddleMouseButton)){
+    float time = PC->GetInputKeyTimeDown(EKeys::MiddleMouseButton);
+    Frame::Fire(KEY_UP_MiddleMouseButton);}
+    
+  if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp))
+    Frame::Fire(KEY_DOWN_MouseScrollUp);
+  if (PC->WasInputKeyJustReleased(EKeys::MouseScrollUp)){
+    float time = PC->GetInputKeyTimeDown(EKeys::MouseScrollUp);
+    Frame::Fire(KEY_UP_MouseScrollUp);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown))
+    Frame::Fire(KEY_DOWN_MouseScrollDown);
+  if (PC->WasInputKeyJustReleased(EKeys::MouseScrollDown)){
+    float time = PC->GetInputKeyTimeDown(EKeys::MouseScrollDown);
+    Frame::Fire(KEY_UP_MouseScrollDown);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::MouseWheelAxis))
+    Frame::Fire(KEY_DOWN_MouseWheelAxis);
+  if (PC->WasInputKeyJustReleased(EKeys::MouseWheelAxis)){
+    float time = PC->GetInputKeyTimeDown(EKeys::MouseWheelAxis);
+    Frame::Fire(KEY_UP_MouseWheelAxis);}
+      
+  if (PC->WasInputKeyJustPressed(EKeys::ThumbMouseButton))
+    Frame::Fire(KEY_DOWN_ThumbMouseButton);
+  if (PC->WasInputKeyJustReleased(EKeys::ThumbMouseButton)){
+    float time = PC->GetInputKeyTimeDown(EKeys::ThumbMouseButton);
+    Frame::Fire(KEY_UP_ThumbMouseButton);}
+        
+  if (PC->WasInputKeyJustPressed(EKeys::ThumbMouseButton2))
+    Frame::Fire(KEY_DOWN_ThumbMouseButton2);
+  if (PC->WasInputKeyJustReleased(EKeys::ThumbMouseButton2)){
+    float time = PC->GetInputKeyTimeDown(EKeys::ThumbMouseButton2);
+    Frame::Fire(KEY_UP_ThumbMouseButton2);}
+}
+
+void CheckAlphabet(APlayerController* PC)
+{
+  if (PC->WasInputKeyJustPressed(EKeys::A))
+    Frame::Fire(KEY_DOWN_A);
+  if (PC->WasInputKeyJustReleased(EKeys::A)){
+    float time = PC->GetInputKeyTimeDown(EKeys::A);
+    Frame::Fire(KEY_UP_A);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::B))
+    Frame::Fire(KEY_DOWN_B);
+  if (PC->WasInputKeyJustReleased(EKeys::B)){
+    float time = PC->GetInputKeyTimeDown(EKeys::B);
+    Frame::Fire(KEY_UP_B);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::C))
+    Frame::Fire(KEY_DOWN_C);
+  if (PC->WasInputKeyJustReleased(EKeys::C)){
+    float time = PC->GetInputKeyTimeDown(EKeys::C);
+    Frame::Fire(KEY_UP_C);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::D))
+    Frame::Fire(KEY_DOWN_D);
+  if (PC->WasInputKeyJustReleased(EKeys::D)){
+    float time = PC->GetInputKeyTimeDown(EKeys::D);
+    Frame::Fire(KEY_UP_D);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::E))
+    Frame::Fire(KEY_DOWN_E);
+  if (PC->WasInputKeyJustReleased(EKeys::E)){
+    float time = PC->GetInputKeyTimeDown(EKeys::E);
+    Frame::Fire(KEY_UP_E);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::F))
+    Frame::Fire(KEY_DOWN_F);
+  if (PC->WasInputKeyJustReleased(EKeys::F)){
+    float time = PC->GetInputKeyTimeDown(EKeys::F);
+    Frame::Fire(KEY_UP_F);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::G))
+    Frame::Fire(KEY_DOWN_G);
+  if (PC->WasInputKeyJustReleased(EKeys::G)){
+    float time = PC->GetInputKeyTimeDown(EKeys::G);
+    Frame::Fire(KEY_UP_G);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::H))
+    Frame::Fire(KEY_DOWN_H);
+  if (PC->WasInputKeyJustReleased(EKeys::H)){
+    float time = PC->GetInputKeyTimeDown(EKeys::H);
+    Frame::Fire(KEY_UP_H);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::I))
+    Frame::Fire(KEY_DOWN_I);
+  if (PC->WasInputKeyJustReleased(EKeys::I)){
+    float time = PC->GetInputKeyTimeDown(EKeys::I);
+    Frame::Fire(KEY_UP_I);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::J))
+    Frame::Fire(KEY_DOWN_J);
+  if (PC->WasInputKeyJustReleased(EKeys::J)){
+    float time = PC->GetInputKeyTimeDown(EKeys::J);
+    Frame::Fire(KEY_UP_J);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::K))
+    Frame::Fire(KEY_DOWN_K);
+  if (PC->WasInputKeyJustReleased(EKeys::K)){
+    float time = PC->GetInputKeyTimeDown(EKeys::K);
+    Frame::Fire(KEY_UP_K);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::L))
+    Frame::Fire(KEY_DOWN_L);
+  if (PC->WasInputKeyJustReleased(EKeys::L)){
+    float time = PC->GetInputKeyTimeDown(EKeys::L);
+    Frame::Fire(KEY_UP_L);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::M))
+    Frame::Fire(KEY_DOWN_M);
+  if (PC->WasInputKeyJustReleased(EKeys::M)){
+    float time = PC->GetInputKeyTimeDown(EKeys::M);
+    Frame::Fire(KEY_UP_M);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::N))
+    Frame::Fire(KEY_DOWN_N);
+  if (PC->WasInputKeyJustReleased(EKeys::N)){
+    float time = PC->GetInputKeyTimeDown(EKeys::N);
+    Frame::Fire(KEY_UP_N);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::O))
+    Frame::Fire(KEY_DOWN_O);
+  if (PC->WasInputKeyJustReleased(EKeys::O)){
+    float time = PC->GetInputKeyTimeDown(EKeys::O);
+    Frame::Fire(KEY_UP_O);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::P))
+    Frame::Fire(KEY_DOWN_P);
+  if (PC->WasInputKeyJustReleased(EKeys::P)){
+    float time = PC->GetInputKeyTimeDown(EKeys::P);
+    Frame::Fire(KEY_UP_P);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::Q))
+    Frame::Fire(KEY_DOWN_Q);
+  if (PC->WasInputKeyJustReleased(EKeys::Q)){
+    float time = PC->GetInputKeyTimeDown(EKeys::Q);
+    Frame::Fire(KEY_UP_Q);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::R))
+    Frame::Fire(KEY_DOWN_R);
+  if (PC->WasInputKeyJustReleased(EKeys::R)){
+    float time = PC->GetInputKeyTimeDown(EKeys::R);
+    Frame::Fire(KEY_UP_R);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::S))
+    Frame::Fire(KEY_DOWN_S);
+  if (PC->WasInputKeyJustReleased(EKeys::S)){
+    float time = PC->GetInputKeyTimeDown(EKeys::S);
+    Frame::Fire(KEY_UP_S);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::T))
+    Frame::Fire(KEY_DOWN_T);
+  if (PC->WasInputKeyJustReleased(EKeys::T)){
+    float time = PC->GetInputKeyTimeDown(EKeys::T);
+    Frame::Fire(KEY_UP_T);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::U))
+    Frame::Fire(KEY_DOWN_U);
+  if (PC->WasInputKeyJustReleased(EKeys::U)){
+    float time = PC->GetInputKeyTimeDown(EKeys::U);
+    Frame::Fire(KEY_UP_U);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::V))
+    Frame::Fire(KEY_DOWN_V);
+  if (PC->WasInputKeyJustReleased(EKeys::V)){
+    float time = PC->GetInputKeyTimeDown(EKeys::V);
+    Frame::Fire(KEY_UP_V);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::W))
+    Frame::Fire(KEY_DOWN_W);
+  if (PC->WasInputKeyJustReleased(EKeys::W)){
+    float time = PC->GetInputKeyTimeDown(EKeys::W);
+    Frame::Fire(KEY_UP_W);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::X))
+    Frame::Fire(KEY_DOWN_X);
+  if (PC->WasInputKeyJustReleased(EKeys::X)){
+    float time = PC->GetInputKeyTimeDown(EKeys::X);
+    Frame::Fire(KEY_UP_X);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::Y))
+    Frame::Fire(KEY_DOWN_Y);
+  if (PC->WasInputKeyJustReleased(EKeys::Y)){
+    float time = PC->GetInputKeyTimeDown(EKeys::Y);
+    Frame::Fire(KEY_UP_Y);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::Z))
+    Frame::Fire(KEY_DOWN_Z);
+  if (PC->WasInputKeyJustReleased(EKeys::Z)){
+    float time = PC->GetInputKeyTimeDown(EKeys::Z);
+    Frame::Fire(KEY_UP_Z);}
+}
+
+void CheckNumbers(APlayerController* PC)
+{
+  if (PC->WasInputKeyJustPressed(EKeys::Zero))
+    Frame::Fire(KEY_DOWN_Zero);
+  if (PC->WasInputKeyJustReleased(EKeys::Zero)){
+    float time = PC->GetInputKeyTimeDown(EKeys::Zero);
+    Frame::Fire(KEY_UP_Zero);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::One))
+    Frame::Fire(KEY_DOWN_One);
+  if (PC->WasInputKeyJustReleased(EKeys::One)){
+    float time = PC->GetInputKeyTimeDown(EKeys::One);
+    Frame::Fire(KEY_UP_One);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::Two))
+    Frame::Fire(KEY_DOWN_Two);
+  if (PC->WasInputKeyJustReleased(EKeys::Two)){
+    float time = PC->GetInputKeyTimeDown(EKeys::Two);
+    Frame::Fire(KEY_UP_Two);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::Three))
+    Frame::Fire(KEY_DOWN_Three);
+  if (PC->WasInputKeyJustReleased(EKeys::Three)){
+    float time = PC->GetInputKeyTimeDown(EKeys::Three);
+    Frame::Fire(KEY_UP_Three);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::Four))
+    Frame::Fire(KEY_DOWN_Four);
+  if (PC->WasInputKeyJustReleased(EKeys::Four)){
+    float time = PC->GetInputKeyTimeDown(EKeys::Four);
+    Frame::Fire(KEY_UP_Four);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::Five))
+    Frame::Fire(KEY_DOWN_Five);
+  if (PC->WasInputKeyJustReleased(EKeys::Five)){
+    float time = PC->GetInputKeyTimeDown(EKeys::Five);
+    Frame::Fire(KEY_UP_Five);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::Six))
+    Frame::Fire(KEY_DOWN_Six);
+  if (PC->WasInputKeyJustReleased(EKeys::Six)){
+    float time = PC->GetInputKeyTimeDown(EKeys::Six);
+    Frame::Fire(KEY_UP_Six);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::Seven))
+    Frame::Fire(KEY_DOWN_Seven);
+  if (PC->WasInputKeyJustReleased(EKeys::Seven)){
+    float time = PC->GetInputKeyTimeDown(EKeys::Seven);
+    Frame::Fire(KEY_UP_Seven);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::Eight))
+    Frame::Fire(KEY_DOWN_Eight);
+  if (PC->WasInputKeyJustReleased(EKeys::Eight)){
+    float time = PC->GetInputKeyTimeDown(EKeys::Eight);
+    Frame::Fire(KEY_UP_Eight);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::Nine))
+    Frame::Fire(KEY_DOWN_Nine);
+  if (PC->WasInputKeyJustReleased(EKeys::Nine)){
+    float time = PC->GetInputKeyTimeDown(EKeys::Nine);
+    Frame::Fire(KEY_UP_Nine);}
+}
+
+void CheckFKeys(APlayerController* PC)
+{
+  if (PC->WasInputKeyJustPressed(EKeys::F1))
+    Frame::Fire(KEY_DOWN_F1);
+  if (PC->WasInputKeyJustReleased(EKeys::F1)){
+    float time = PC->GetInputKeyTimeDown(EKeys::F1);
+    Frame::Fire(KEY_UP_F1);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::F2))
+    Frame::Fire(KEY_DOWN_F2);
+  if (PC->WasInputKeyJustReleased(EKeys::F2)){
+    float time = PC->GetInputKeyTimeDown(EKeys::F2);
+    Frame::Fire(KEY_UP_F2);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::F3))
+    Frame::Fire(KEY_DOWN_F3);
+  if (PC->WasInputKeyJustReleased(EKeys::F3)){
+    float time = PC->GetInputKeyTimeDown(EKeys::F3);
+    Frame::Fire(KEY_UP_F3);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::F4))
+    Frame::Fire(KEY_DOWN_F4);
+  if (PC->WasInputKeyJustReleased(EKeys::F4)){
+    float time = PC->GetInputKeyTimeDown(EKeys::F4);
+    Frame::Fire(KEY_UP_F4);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::F5))
+    Frame::Fire(KEY_DOWN_F5);
+  if (PC->WasInputKeyJustReleased(EKeys::F5)){
+    float time = PC->GetInputKeyTimeDown(EKeys::F5);
+    Frame::Fire(KEY_UP_F5);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::F6))
+    Frame::Fire(KEY_DOWN_F6);
+  if (PC->WasInputKeyJustReleased(EKeys::F6)){
+    float time = PC->GetInputKeyTimeDown(EKeys::F6);
+    Frame::Fire(KEY_UP_F6);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::F7))
+    Frame::Fire(KEY_DOWN_F7);
+  if (PC->WasInputKeyJustReleased(EKeys::F7)){
+    float time = PC->GetInputKeyTimeDown(EKeys::F7);
+    Frame::Fire(KEY_UP_F7);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::F8))
+    Frame::Fire(KEY_DOWN_F8);
+  if (PC->WasInputKeyJustReleased(EKeys::F8)){
+    float time = PC->GetInputKeyTimeDown(EKeys::F8);
+    Frame::Fire(KEY_UP_F8);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::F9))
+    Frame::Fire(KEY_DOWN_F9);
+  if (PC->WasInputKeyJustReleased(EKeys::F9)){
+    float time = PC->GetInputKeyTimeDown(EKeys::F9);
+    Frame::Fire(KEY_UP_F9);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::F10))
+    Frame::Fire(KEY_DOWN_F10);
+  if (PC->WasInputKeyJustReleased(EKeys::F10)){
+    float time = PC->GetInputKeyTimeDown(EKeys::F10);
+    Frame::Fire(KEY_UP_F10);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::F11))
+    Frame::Fire(KEY_DOWN_F11);
+  if (PC->WasInputKeyJustReleased(EKeys::F11)){
+    float time = PC->GetInputKeyTimeDown(EKeys::F11);
+    Frame::Fire(KEY_UP_F11);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::F12))
+    Frame::Fire(KEY_DOWN_F12);
+  if (PC->WasInputKeyJustReleased(EKeys::F12)){
+    float time = PC->GetInputKeyTimeDown(EKeys::F12);
+    Frame::Fire(KEY_UP_F12);}
+}
+
+void CheckModKeys(APlayerController* PC)
+{
+  if (PC->WasInputKeyJustPressed(EKeys::NumLock))
+    Frame::Fire(KEY_DOWN_NumLock);
+  if (PC->WasInputKeyJustReleased(EKeys::NumLock)){
+    float time = PC->GetInputKeyTimeDown(EKeys::NumLock);
+    Frame::Fire(KEY_UP_NumLock);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::ScrollLock))
+    Frame::Fire(KEY_DOWN_ScrollLock);
+  if (PC->WasInputKeyJustReleased(EKeys::ScrollLock)){
+    float time = PC->GetInputKeyTimeDown(EKeys::ScrollLock);
+    Frame::Fire(KEY_UP_ScrollLock);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::LeftShift))
+    Frame::Fire(KEY_DOWN_LeftShift);
+  if (PC->WasInputKeyJustReleased(EKeys::LeftShift)){
+    float time = PC->GetInputKeyTimeDown(EKeys::LeftShift);
+    Frame::Fire(KEY_UP_LeftShift);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::RightShift))
+    Frame::Fire(KEY_DOWN_RightShift);
+  if (PC->WasInputKeyJustReleased(EKeys::RightShift)){
+    float time = PC->GetInputKeyTimeDown(EKeys::RightShift);
+    Frame::Fire(KEY_UP_RightShift);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::LeftControl))
+    Frame::Fire(KEY_DOWN_LeftControl);
+  if (PC->WasInputKeyJustReleased(EKeys::LeftControl)){
+    float time = PC->GetInputKeyTimeDown(EKeys::LeftControl);
+    Frame::Fire(KEY_UP_LeftControl);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::RightControl))
+    Frame::Fire(KEY_DOWN_RightControl);
+  if (PC->WasInputKeyJustReleased(EKeys::RightControl)){
+    float time = PC->GetInputKeyTimeDown(EKeys::RightControl);
+    Frame::Fire(KEY_UP_RightControl);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::LeftAlt))
+    Frame::Fire(KEY_DOWN_LeftAlt);
+  if (PC->WasInputKeyJustReleased(EKeys::LeftAlt)){
+    float time = PC->GetInputKeyTimeDown(EKeys::LeftAlt);
+    Frame::Fire(KEY_UP_LeftAlt);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::RightAlt))
+    Frame::Fire(KEY_DOWN_RightAlt);
+  if (PC->WasInputKeyJustReleased(EKeys::RightAlt)){
+    float time = PC->GetInputKeyTimeDown(EKeys::RightAlt);
+    Frame::Fire(KEY_UP_RightAlt);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::LeftCommand))
+    Frame::Fire(KEY_DOWN_LeftCommand);
+  if (PC->WasInputKeyJustReleased(EKeys::LeftCommand)){
+    float time = PC->GetInputKeyTimeDown(EKeys::LeftCommand);
+    Frame::Fire(KEY_UP_LeftCommand);}
+  
+  if (PC->WasInputKeyJustPressed(EKeys::RightCommand))
+    Frame::Fire(KEY_DOWN_RightCommand);
+  if (PC->WasInputKeyJustReleased(EKeys::RightCommand)){
+    float time = PC->GetInputKeyTimeDown(EKeys::RightCommand);
+    Frame::Fire(KEY_UP_RightCommand);}
+}
+
 void AFPSHUD::CheckAllKeys()
 {
   // This function profiles at about 277 times per millisecond with all enabled
@@ -980,16 +1498,18 @@ void AFPSHUD::CheckAllKeys()
   // The cost of the array should easily be made up for by the gain of not
   // checking everything
   
-  bool bMouseButtons = true;
-  bool bAlphabetKeys = true;
-  bool bFKeys = true;
-  bool bModKeys = true;
   bool bNumberKeys = true;
   
   bool bExtraKeys = false;
   bool bNumPadKeys = false;
   bool bMathKeys = false;
   bool bArrowKeys = false;
+  
+  CheckModKeys(PC);
+  CheckMouse(PC);
+  CheckAlphabet(PC);
+  CheckNumbers(PC);
+  CheckFKeys(PC);
   
   // if (PC->WasInputKeyJustPressed(EKeys::MouseX))
   // 	Frame::Fire(KEY_DOWN_MouseX);
@@ -1002,57 +1522,6 @@ void AFPSHUD::CheckAllKeys()
   // if (PC->WasInputKeyJustReleased(EKeys::MouseY)){
   // 	float time = PC->GetInputKeyTimeDown(EKeys::MouseY);
   // 	Frame::Fire(KEY_UP_MouseY);}
-  
-  if (bMouseButtons)
-  {
-    if (PC->WasInputKeyJustPressed(EKeys::LeftMouseButton))
-      Frame::Fire(KEY_DOWN_LeftMouseButton);
-    if (PC->WasInputKeyJustReleased(EKeys::LeftMouseButton)){
-      float time = PC->GetInputKeyTimeDown(EKeys::LeftMouseButton);
-      Frame::Fire(KEY_UP_LeftMouseButton);}
-      
-    if (PC->WasInputKeyJustPressed(EKeys::RightMouseButton))
-      Frame::Fire(KEY_DOWN_RightMouseButton);
-    if (PC->WasInputKeyJustReleased(EKeys::RightMouseButton)){
-      float time = PC->GetInputKeyTimeDown(EKeys::RightMouseButton);
-      Frame::Fire(KEY_UP_RightMouseButton);}
-      
-    if (PC->WasInputKeyJustPressed(EKeys::MiddleMouseButton))
-      Frame::Fire(KEY_DOWN_MiddleMouseButton);
-    if (PC->WasInputKeyJustReleased(EKeys::MiddleMouseButton)){
-      float time = PC->GetInputKeyTimeDown(EKeys::MiddleMouseButton);
-      Frame::Fire(KEY_UP_MiddleMouseButton);}
-      
-    if (PC->WasInputKeyJustPressed(EKeys::MouseScrollUp))
-      Frame::Fire(KEY_DOWN_MouseScrollUp);
-    if (PC->WasInputKeyJustReleased(EKeys::MouseScrollUp)){
-      float time = PC->GetInputKeyTimeDown(EKeys::MouseScrollUp);
-      Frame::Fire(KEY_UP_MouseScrollUp);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::MouseScrollDown))
-      Frame::Fire(KEY_DOWN_MouseScrollDown);
-    if (PC->WasInputKeyJustReleased(EKeys::MouseScrollDown)){
-      float time = PC->GetInputKeyTimeDown(EKeys::MouseScrollDown);
-      Frame::Fire(KEY_UP_MouseScrollDown);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::MouseWheelAxis))
-      Frame::Fire(KEY_DOWN_MouseWheelAxis);
-    if (PC->WasInputKeyJustReleased(EKeys::MouseWheelAxis)){
-      float time = PC->GetInputKeyTimeDown(EKeys::MouseWheelAxis);
-      Frame::Fire(KEY_UP_MouseWheelAxis);}
-        
-    if (PC->WasInputKeyJustPressed(EKeys::ThumbMouseButton))
-      Frame::Fire(KEY_DOWN_ThumbMouseButton);
-    if (PC->WasInputKeyJustReleased(EKeys::ThumbMouseButton)){
-      float time = PC->GetInputKeyTimeDown(EKeys::ThumbMouseButton);
-      Frame::Fire(KEY_UP_ThumbMouseButton);}
-          
-    if (PC->WasInputKeyJustPressed(EKeys::ThumbMouseButton2))
-      Frame::Fire(KEY_DOWN_ThumbMouseButton2);
-    if (PC->WasInputKeyJustReleased(EKeys::ThumbMouseButton2)){
-      float time = PC->GetInputKeyTimeDown(EKeys::ThumbMouseButton2);
-      Frame::Fire(KEY_UP_ThumbMouseButton2);}
-  }
   
   if (PC->WasInputKeyJustPressed(EKeys::BackSpace))
   	Frame::Fire(KEY_DOWN_BackSpace);
@@ -1162,228 +1631,6 @@ void AFPSHUD::CheckAllKeys()
       Frame::Fire(KEY_UP_Down);}
   }
   
-  if (bNumberKeys)
-  {
-    if (PC->WasInputKeyJustPressed(EKeys::Zero))
-      Frame::Fire(KEY_DOWN_Zero);
-    if (PC->WasInputKeyJustReleased(EKeys::Zero)){
-      float time = PC->GetInputKeyTimeDown(EKeys::Zero);
-      Frame::Fire(KEY_UP_Zero);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::One))
-      Frame::Fire(KEY_DOWN_One);
-    if (PC->WasInputKeyJustReleased(EKeys::One)){
-      float time = PC->GetInputKeyTimeDown(EKeys::One);
-      Frame::Fire(KEY_UP_One);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::Two))
-      Frame::Fire(KEY_DOWN_Two);
-    if (PC->WasInputKeyJustReleased(EKeys::Two)){
-      float time = PC->GetInputKeyTimeDown(EKeys::Two);
-      Frame::Fire(KEY_UP_Two);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::Three))
-      Frame::Fire(KEY_DOWN_Three);
-    if (PC->WasInputKeyJustReleased(EKeys::Three)){
-      float time = PC->GetInputKeyTimeDown(EKeys::Three);
-      Frame::Fire(KEY_UP_Three);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::Four))
-      Frame::Fire(KEY_DOWN_Four);
-    if (PC->WasInputKeyJustReleased(EKeys::Four)){
-      float time = PC->GetInputKeyTimeDown(EKeys::Four);
-      Frame::Fire(KEY_UP_Four);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::Five))
-      Frame::Fire(KEY_DOWN_Five);
-    if (PC->WasInputKeyJustReleased(EKeys::Five)){
-      float time = PC->GetInputKeyTimeDown(EKeys::Five);
-      Frame::Fire(KEY_UP_Five);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::Six))
-      Frame::Fire(KEY_DOWN_Six);
-    if (PC->WasInputKeyJustReleased(EKeys::Six)){
-      float time = PC->GetInputKeyTimeDown(EKeys::Six);
-      Frame::Fire(KEY_UP_Six);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::Seven))
-      Frame::Fire(KEY_DOWN_Seven);
-    if (PC->WasInputKeyJustReleased(EKeys::Seven)){
-      float time = PC->GetInputKeyTimeDown(EKeys::Seven);
-      Frame::Fire(KEY_UP_Seven);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::Eight))
-      Frame::Fire(KEY_DOWN_Eight);
-    if (PC->WasInputKeyJustReleased(EKeys::Eight)){
-      float time = PC->GetInputKeyTimeDown(EKeys::Eight);
-      Frame::Fire(KEY_UP_Eight);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::Nine))
-      Frame::Fire(KEY_DOWN_Nine);
-    if (PC->WasInputKeyJustReleased(EKeys::Nine)){
-      float time = PC->GetInputKeyTimeDown(EKeys::Nine);
-      Frame::Fire(KEY_UP_Nine);}
-  }
-  
-  if (bAlphabetKeys)
-  {
-    if (PC->WasInputKeyJustPressed(EKeys::A))
-      Frame::Fire(KEY_DOWN_A);
-    if (PC->WasInputKeyJustReleased(EKeys::A)){
-      float time = PC->GetInputKeyTimeDown(EKeys::A);
-      Frame::Fire(KEY_UP_A);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::B))
-      Frame::Fire(KEY_DOWN_B);
-    if (PC->WasInputKeyJustReleased(EKeys::B)){
-      float time = PC->GetInputKeyTimeDown(EKeys::B);
-      Frame::Fire(KEY_UP_B);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::C))
-      Frame::Fire(KEY_DOWN_C);
-    if (PC->WasInputKeyJustReleased(EKeys::C)){
-      float time = PC->GetInputKeyTimeDown(EKeys::C);
-      Frame::Fire(KEY_UP_C);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::D))
-      Frame::Fire(KEY_DOWN_D);
-    if (PC->WasInputKeyJustReleased(EKeys::D)){
-      float time = PC->GetInputKeyTimeDown(EKeys::D);
-      Frame::Fire(KEY_UP_D);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::E))
-      Frame::Fire(KEY_DOWN_E);
-    if (PC->WasInputKeyJustReleased(EKeys::E)){
-      float time = PC->GetInputKeyTimeDown(EKeys::E);
-      Frame::Fire(KEY_UP_E);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::F))
-      Frame::Fire(KEY_DOWN_F);
-    if (PC->WasInputKeyJustReleased(EKeys::F)){
-      float time = PC->GetInputKeyTimeDown(EKeys::F);
-      Frame::Fire(KEY_UP_F);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::G))
-      Frame::Fire(KEY_DOWN_G);
-    if (PC->WasInputKeyJustReleased(EKeys::G)){
-      float time = PC->GetInputKeyTimeDown(EKeys::G);
-      Frame::Fire(KEY_UP_G);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::H))
-      Frame::Fire(KEY_DOWN_H);
-    if (PC->WasInputKeyJustReleased(EKeys::H)){
-      float time = PC->GetInputKeyTimeDown(EKeys::H);
-      Frame::Fire(KEY_UP_H);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::I))
-      Frame::Fire(KEY_DOWN_I);
-    if (PC->WasInputKeyJustReleased(EKeys::I)){
-      float time = PC->GetInputKeyTimeDown(EKeys::I);
-      Frame::Fire(KEY_UP_I);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::J))
-      Frame::Fire(KEY_DOWN_J);
-    if (PC->WasInputKeyJustReleased(EKeys::J)){
-      float time = PC->GetInputKeyTimeDown(EKeys::J);
-      Frame::Fire(KEY_UP_J);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::K))
-      Frame::Fire(KEY_DOWN_K);
-    if (PC->WasInputKeyJustReleased(EKeys::K)){
-      float time = PC->GetInputKeyTimeDown(EKeys::K);
-      Frame::Fire(KEY_UP_K);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::L))
-      Frame::Fire(KEY_DOWN_L);
-    if (PC->WasInputKeyJustReleased(EKeys::L)){
-      float time = PC->GetInputKeyTimeDown(EKeys::L);
-      Frame::Fire(KEY_UP_L);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::M))
-      Frame::Fire(KEY_DOWN_M);
-    if (PC->WasInputKeyJustReleased(EKeys::M)){
-      float time = PC->GetInputKeyTimeDown(EKeys::M);
-      Frame::Fire(KEY_UP_M);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::N))
-      Frame::Fire(KEY_DOWN_N);
-    if (PC->WasInputKeyJustReleased(EKeys::N)){
-      float time = PC->GetInputKeyTimeDown(EKeys::N);
-      Frame::Fire(KEY_UP_N);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::O))
-      Frame::Fire(KEY_DOWN_O);
-    if (PC->WasInputKeyJustReleased(EKeys::O)){
-      float time = PC->GetInputKeyTimeDown(EKeys::O);
-      Frame::Fire(KEY_UP_O);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::P))
-      Frame::Fire(KEY_DOWN_P);
-    if (PC->WasInputKeyJustReleased(EKeys::P)){
-      float time = PC->GetInputKeyTimeDown(EKeys::P);
-      Frame::Fire(KEY_UP_P);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::Q))
-      Frame::Fire(KEY_DOWN_Q);
-    if (PC->WasInputKeyJustReleased(EKeys::Q)){
-      float time = PC->GetInputKeyTimeDown(EKeys::Q);
-      Frame::Fire(KEY_UP_Q);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::R))
-      Frame::Fire(KEY_DOWN_R);
-    if (PC->WasInputKeyJustReleased(EKeys::R)){
-      float time = PC->GetInputKeyTimeDown(EKeys::R);
-      Frame::Fire(KEY_UP_R);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::S))
-      Frame::Fire(KEY_DOWN_S);
-    if (PC->WasInputKeyJustReleased(EKeys::S)){
-      float time = PC->GetInputKeyTimeDown(EKeys::S);
-      Frame::Fire(KEY_UP_S);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::T))
-      Frame::Fire(KEY_DOWN_T);
-    if (PC->WasInputKeyJustReleased(EKeys::T)){
-      float time = PC->GetInputKeyTimeDown(EKeys::T);
-      Frame::Fire(KEY_UP_T);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::U))
-      Frame::Fire(KEY_DOWN_U);
-    if (PC->WasInputKeyJustReleased(EKeys::U)){
-      float time = PC->GetInputKeyTimeDown(EKeys::U);
-      Frame::Fire(KEY_UP_U);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::V))
-      Frame::Fire(KEY_DOWN_V);
-    if (PC->WasInputKeyJustReleased(EKeys::V)){
-      float time = PC->GetInputKeyTimeDown(EKeys::V);
-      Frame::Fire(KEY_UP_V);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::W))
-      Frame::Fire(KEY_DOWN_W);
-    if (PC->WasInputKeyJustReleased(EKeys::W)){
-      float time = PC->GetInputKeyTimeDown(EKeys::W);
-      Frame::Fire(KEY_UP_W);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::X))
-      Frame::Fire(KEY_DOWN_X);
-    if (PC->WasInputKeyJustReleased(EKeys::X)){
-      float time = PC->GetInputKeyTimeDown(EKeys::X);
-      Frame::Fire(KEY_UP_X);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::Y))
-      Frame::Fire(KEY_DOWN_Y);
-    if (PC->WasInputKeyJustReleased(EKeys::Y)){
-      float time = PC->GetInputKeyTimeDown(EKeys::Y);
-      Frame::Fire(KEY_UP_Y);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::Z))
-      Frame::Fire(KEY_DOWN_Z);
-    if (PC->WasInputKeyJustReleased(EKeys::Z)){
-      float time = PC->GetInputKeyTimeDown(EKeys::Z);
-      Frame::Fire(KEY_UP_Z);}
-  }
-  
   if (bNumPadKeys)
   {
     if (PC->WasInputKeyJustPressed(EKeys::NumPadZero))
@@ -1478,144 +1725,6 @@ void AFPSHUD::CheckAllKeys()
     if (PC->WasInputKeyJustReleased(EKeys::Divide)){
     	float time = PC->GetInputKeyTimeDown(EKeys::Divide);
     	Frame::Fire(KEY_UP_Divide);}
-  }
-  
-  if (bFKeys)
-  {
-    if (PC->WasInputKeyJustPressed(EKeys::F1))
-      Frame::Fire(KEY_DOWN_F1);
-    if (PC->WasInputKeyJustReleased(EKeys::F1)){
-      float time = PC->GetInputKeyTimeDown(EKeys::F1);
-      Frame::Fire(KEY_UP_F1);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::F2))
-      Frame::Fire(KEY_DOWN_F2);
-    if (PC->WasInputKeyJustReleased(EKeys::F2)){
-      float time = PC->GetInputKeyTimeDown(EKeys::F2);
-      Frame::Fire(KEY_UP_F2);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::F3))
-      Frame::Fire(KEY_DOWN_F3);
-    if (PC->WasInputKeyJustReleased(EKeys::F3)){
-      float time = PC->GetInputKeyTimeDown(EKeys::F3);
-      Frame::Fire(KEY_UP_F3);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::F4))
-      Frame::Fire(KEY_DOWN_F4);
-    if (PC->WasInputKeyJustReleased(EKeys::F4)){
-      float time = PC->GetInputKeyTimeDown(EKeys::F4);
-      Frame::Fire(KEY_UP_F4);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::F5))
-      Frame::Fire(KEY_DOWN_F5);
-    if (PC->WasInputKeyJustReleased(EKeys::F5)){
-      float time = PC->GetInputKeyTimeDown(EKeys::F5);
-      Frame::Fire(KEY_UP_F5);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::F6))
-      Frame::Fire(KEY_DOWN_F6);
-    if (PC->WasInputKeyJustReleased(EKeys::F6)){
-      float time = PC->GetInputKeyTimeDown(EKeys::F6);
-      Frame::Fire(KEY_UP_F6);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::F7))
-      Frame::Fire(KEY_DOWN_F7);
-    if (PC->WasInputKeyJustReleased(EKeys::F7)){
-      float time = PC->GetInputKeyTimeDown(EKeys::F7);
-      Frame::Fire(KEY_UP_F7);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::F8))
-      Frame::Fire(KEY_DOWN_F8);
-    if (PC->WasInputKeyJustReleased(EKeys::F8)){
-      float time = PC->GetInputKeyTimeDown(EKeys::F8);
-      Frame::Fire(KEY_UP_F8);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::F9))
-      Frame::Fire(KEY_DOWN_F9);
-    if (PC->WasInputKeyJustReleased(EKeys::F9)){
-      float time = PC->GetInputKeyTimeDown(EKeys::F9);
-      Frame::Fire(KEY_UP_F9);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::F10))
-      Frame::Fire(KEY_DOWN_F10);
-    if (PC->WasInputKeyJustReleased(EKeys::F10)){
-      float time = PC->GetInputKeyTimeDown(EKeys::F10);
-      Frame::Fire(KEY_UP_F10);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::F11))
-      Frame::Fire(KEY_DOWN_F11);
-    if (PC->WasInputKeyJustReleased(EKeys::F11)){
-      float time = PC->GetInputKeyTimeDown(EKeys::F11);
-      Frame::Fire(KEY_UP_F11);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::F12))
-      Frame::Fire(KEY_DOWN_F12);
-    if (PC->WasInputKeyJustReleased(EKeys::F12)){
-      float time = PC->GetInputKeyTimeDown(EKeys::F12);
-      Frame::Fire(KEY_UP_F12);}
-  }
-  
-  if (bModKeys)
-  {
-    if (PC->WasInputKeyJustPressed(EKeys::NumLock))
-      Frame::Fire(KEY_DOWN_NumLock);
-    if (PC->WasInputKeyJustReleased(EKeys::NumLock)){
-      float time = PC->GetInputKeyTimeDown(EKeys::NumLock);
-      Frame::Fire(KEY_UP_NumLock);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::ScrollLock))
-      Frame::Fire(KEY_DOWN_ScrollLock);
-    if (PC->WasInputKeyJustReleased(EKeys::ScrollLock)){
-      float time = PC->GetInputKeyTimeDown(EKeys::ScrollLock);
-      Frame::Fire(KEY_UP_ScrollLock);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::LeftShift))
-      Frame::Fire(KEY_DOWN_LeftShift);
-    if (PC->WasInputKeyJustReleased(EKeys::LeftShift)){
-      float time = PC->GetInputKeyTimeDown(EKeys::LeftShift);
-      Frame::Fire(KEY_UP_LeftShift);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::RightShift))
-      Frame::Fire(KEY_DOWN_RightShift);
-    if (PC->WasInputKeyJustReleased(EKeys::RightShift)){
-      float time = PC->GetInputKeyTimeDown(EKeys::RightShift);
-      Frame::Fire(KEY_UP_RightShift);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::LeftControl))
-      Frame::Fire(KEY_DOWN_LeftControl);
-    if (PC->WasInputKeyJustReleased(EKeys::LeftControl)){
-      float time = PC->GetInputKeyTimeDown(EKeys::LeftControl);
-      Frame::Fire(KEY_UP_LeftControl);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::RightControl))
-      Frame::Fire(KEY_DOWN_RightControl);
-    if (PC->WasInputKeyJustReleased(EKeys::RightControl)){
-      float time = PC->GetInputKeyTimeDown(EKeys::RightControl);
-      Frame::Fire(KEY_UP_RightControl);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::LeftAlt))
-      Frame::Fire(KEY_DOWN_LeftAlt);
-    if (PC->WasInputKeyJustReleased(EKeys::LeftAlt)){
-      float time = PC->GetInputKeyTimeDown(EKeys::LeftAlt);
-      Frame::Fire(KEY_UP_LeftAlt);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::RightAlt))
-      Frame::Fire(KEY_DOWN_RightAlt);
-    if (PC->WasInputKeyJustReleased(EKeys::RightAlt)){
-      float time = PC->GetInputKeyTimeDown(EKeys::RightAlt);
-      Frame::Fire(KEY_UP_RightAlt);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::LeftCommand))
-      Frame::Fire(KEY_DOWN_LeftCommand);
-    if (PC->WasInputKeyJustReleased(EKeys::LeftCommand)){
-      float time = PC->GetInputKeyTimeDown(EKeys::LeftCommand);
-      Frame::Fire(KEY_UP_LeftCommand);}
-    
-    if (PC->WasInputKeyJustPressed(EKeys::RightCommand))
-      Frame::Fire(KEY_DOWN_RightCommand);
-    if (PC->WasInputKeyJustReleased(EKeys::RightCommand)){
-      float time = PC->GetInputKeyTimeDown(EKeys::RightCommand);
-      Frame::Fire(KEY_UP_RightCommand);}
   }
   
   
