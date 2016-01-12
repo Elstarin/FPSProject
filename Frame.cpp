@@ -12,19 +12,6 @@ TArray<Frame*> Frame::Level::FrameList;
 TArray<Frame::Scripts> Frame::OnUpdateList;
 TMap<int32, Frame::Level> Frame::Strata::LevelMap;
 
-TArray<Frame*> Frame::MOUSE_ENTER_list;
-TArray<Frame*> Frame::MOUSE_EXIT_list;
-TArray<Frame*> Frame::GAME_START_list;
-TArray<Frame*> Frame::GAME_QUIT_list;
-TArray<Frame*> Frame::FRAME_CREATED_list;
-TArray<Frame*> Frame::MOUSE_CLICKED_DOWN_list;
-TArray<Frame*> Frame::MOUSE_CLICKED_UP_list;
-TArray<Frame*> Frame::MOUSE_MOVEMENT_list;
-TArray<Frame*> Frame::KEY_DOWN_list;
-TArray<Frame*> Frame::KEY_UP_list;
-TArray<Frame*> Frame::UPDATE_list;
-TArray<Frame*> Frame::WINDOW_FOCUS_list;
-
 Frame::Frame()
 {
   w = 0.f;
@@ -52,6 +39,21 @@ Frame::Frame()
 Frame::~Frame()
 {
 }
+
+class Actor : Frame
+{
+	
+};
+
+class Display3D : Frame
+{
+	
+};
+
+class Display2D : Frame
+{
+	
+};
 
 // Event setting functions /////////////////////////////////////////////////////
 void Frame::Set_MOUSE_ENTER(FuncType func)
@@ -158,13 +160,13 @@ void Frame::Set_GAME_STOP(FuncType func)
     EventMap.Emplace(EventEnum::GAME_STOP, func);
 }
 
-// void Frame::Set_MOUSE_MOVEMENT(FuncType func)
-// {
-//   if (EventMap.Contains(EventEnum::MOUSE_MOVEMENT))
-//     EventMap[EventEnum::MOUSE_MOVEMENT = func;
-//   else
-//     EventMap.Emplace(EventEnum::MOUSE_MOVEMENT, func);
-// }
+void Frame::Set_MOUSE_MOVING(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::MOUSE_MOVING))
+    EventMap[EventEnum::MOUSE_MOVING] = func;
+  else
+    EventMap.Emplace(EventEnum::MOUSE_MOVING, func);
+}
 
 void Frame::Set_MOUSE_X_DOWN(FuncType func)
 {
@@ -342,53 +344,6 @@ void Frame::SetScript(ScriptTypes script, void (*func)())
 }
 // END Set functions ///////////////////////////////////////////////////////////
 
-// void Frame::RegisterEvent(EventEnum event)
-// {
-//   Frame* f = this;
-//   switch (event)
-//   {
-//   case EventEnum::MOUSE_ENTER:
-//       MOUSE_ENTER_list.Emplace(f);
-//       break;
-//     case EventEnum::MOUSE_EXIT:
-//       MOUSE_EXIT_list.Emplace(f);
-//       break;
-//     case EventEnum::GAME_START:
-//       GAME_START_list.Emplace(f);
-//       break;
-//     case EventEnum::UPDATE:
-//       UPDATE_list.Emplace(f);
-//       break;
-//     case EventEnum::FRAME_CREATED:
-//       FRAME_CREATED_list.Emplace(f);
-//       break;
-//     case EventEnum::WINDOW_FOCUS:
-//       WINDOW_FOCUS_list.Emplace(f);
-//       break;
-//     case EventEnum::KEY_DOWN:
-//       KEY_DOWN_list.Emplace(f);
-//       break;
-//     case EventEnum::KEY_UP:
-//       KEY_UP_list.Emplace(f);
-//       break;
-//     case EventEnum::GAME_QUIT:
-//       GAME_QUIT_list.Emplace(f);
-//       break;
-//     case EventEnum::MOUSE_CLICKED_DOWN:
-//       MOUSE_CLICKED_DOWN_list.Emplace(f);
-//       break;
-//     case EventEnum::MOUSE_CLICKED_UP:
-//       MOUSE_CLICKED_UP_list.Emplace(f);
-//       break;
-//     case EventEnum::MOUSE_MOVEMENT:
-//       MOUSE_MOVEMENT_list.Emplace(f);
-//       break;
-//     default:
-//       print("No event: ", event);
-//       break;
-//   }
-// }
-
 void Frame::OnEvent(void (*func)(Frame*, EventEnum))
 {
   OnEventFunc = func;
@@ -553,162 +508,48 @@ void Frame::OnEvent(void (*func)(Frame*, EventEnum))
 
 void Frame::Fire(EventEnum event)
 {
-  for (int32 i = 0; i < FrameList.Num(); i++)
-    for (auto& element : FrameList[i]->EventMap)
-      if ((element.Key == event) && (element.Value))
-        element.Value();
-  
-  
-  // switch (event)
-  // {
-  //   case EventEnum::MOUSE_ENTER:
-  //     for (int32 i = 0; i < FrameList.Num(); i++)
-  //       if (FrameList[i]->MOUSE_ENTER) FrameList[i]->MOUSE_ENTER();
-  //     break;
-  //   case EventEnum::MOUSE_EXIT:
-  //     for (int32 i = 0; i < FrameList.Num(); i++)
-  //       if (FrameList[i]->MOUSE_EXIT) FrameList[i]->MOUSE_EXIT();
-  //     break;
-  //   case EventEnum::UPDATE:
-  //     for (int32 i = 0; i < FrameList.Num(); i++)
-  //       if (FrameList[i]->UPDATE) FrameList[i]->UPDATE();
-  //     break;
-  //   case EventEnum::FRAME_CREATED:
-  //     for (int32 i = 0; i < FrameList.Num(); i++)
-  //       if (FrameList[i]->FRAME_CREATED) FrameList[i]->FRAME_CREATED();
-  //     break;
-  //   case EventEnum::WINDOW_FOCUS_GAINED:
-  //     for (int32 i = 0; i < FrameList.Num(); i++)
-  //       if (FrameList[i]->WINDOW_FOCUS_GAINED) FrameList[i]->WINDOW_FOCUS_GAINED();
-  //     break;
-  //   case EventEnum::WINDOW_FOCUS_LOST:
-  //     for (int32 i = 0; i < FrameList.Num(); i++)
-  //       if (FrameList[i]->WINDOW_FOCUS_LOST) FrameList[i]->WINDOW_FOCUS_LOST();
-  //     break;
-  //   case EventEnum::KEY_DOWN:
-  //     for (int32 i = 0; i < FrameList.Num(); i++)
-  //       if (FrameList[i]->KEY_DOWN) FrameList[i]->KEY_DOWN();
-  //     break;
-  //   case EventEnum::KEY_UP:
-  //     for (int32 i = 0; i < FrameList.Num(); i++)
-  //       if (FrameList[i]->KEY_UP) FrameList[i]->KEY_UP();
-  //     break;
-  //   case EventEnum::GAME_START:
-  //     for (int32 i = 0; i < FrameList.Num(); i++)
-  //       if (FrameList[i]->GAME_START) FrameList[i]->GAME_START();
-  //     break;
-  //   case EventEnum::GAME_PAUSE:
-  //     for (int32 i = 0; i < FrameList.Num(); i++)
-  //       if (FrameList[i]->GAME_PAUSE) FrameList[i]->GAME_PAUSE();
-  //     break;
-  //   case EventEnum::GAME_STOP:
-  //     for (int32 i = 0; i < FrameList.Num(); i++)
-  //       if (FrameList[i]->GAME_STOP) FrameList[i]->GAME_STOP();
-  //     break;
-  //   case EventEnum::MOUSE_CLICKED_DOWN:
-  //     for (int32 i = 0; i < FrameList.Num(); i++)
-  //       if (FrameList[i]->MOUSE_CLICKED_DOWN) FrameList[i]->MOUSE_CLICKED_DOWN();
-  //     break;
-  //   case EventEnum::MOUSE_CLICKED_UP:
-  //     for (int32 i = 0; i < FrameList.Num(); i++)
-  //       if (FrameList[i]->MOUSE_CLICKED_UP) FrameList[i]->MOUSE_CLICKED_UP();
-  //     break;
-  //   case EventEnum::MOUSE_MOVEMENT:
-  //     for (int32 i = 0; i < FrameList.Num(); i++)
-  //       if (FrameList[i]->MOUSE_MOVEMENT) FrameList[i]->MOUSE_MOVEMENT();
-  //     break;
-  //   default:
-  //     break;
-  // }
+  switch (event) // Event override behavior can go in here
+  {
+    case EventEnum::SCORE_UPDATE:
+      return;
+    // case EventEnum::MOUSE_EXIT:
+    //   return;
+    // case EventEnum::MOUSE_CLICKED_DOWN:
+    //   return;
+    // case EventEnum::MOUSE_CLICKED_UP:
+    //   return;
+    // case EventEnum::UPDATE:
+    //   return;
+    // case EventEnum::FRAME_CREATED:
+    //   return;
+    // case EventEnum::GAME_START:
+    //   return;
+    // case EventEnum::GAME_STOP:
+    //   return;
+    // case EventEnum::KEY_DOWN:
+    //   return;
+    // case EventEnum::KEY_UP:
+    //   return;
+    // case EventEnum::MOUSE_MOVING:
+    //   return;
+    // case EventEnum::WINDOW_FOCUS_GAINED:
+    //   return;
+    // case EventEnum::WINDOW_FOCUS_LOST:
+    //   return;
+    // case EventEnum::DRAWING:
+    //   return;
+    // case EventEnum::SCORE_UPDATE:
+    //   return;
+    default: // If there is no special behavior for this event, pass it down here
+      for (auto& f : FrameList) // Iterate through every frame
+      {
+        if (f->EventMap.Contains(event)) // Check if they have the event
+        {
+          f->EventMap[event](); // Call the event
+        }
+      }
+  }
 }
-
-// void Frame::Fire(EventEnum event)
-// {
-//   // This function is called from various places all around the code
-//   // It is given an event from an enum list
-//   // It figures out which TArray of registered frames belongs with that event
-//   // Then loops through each registered frame, calling its OnEventFunc function
-//
-//   // TArray<EventEnum> eventArray;
-//   //
-//   // for (int32 i = 0; i < ARRAY_COUNT(bEventList); i++)
-//   // {
-//   //   bEventList[i] = false;
-//   // }
-//
-//   switch (event)
-//   {
-//     case EventEnum::MOUSE_ENTER:
-//       if (MOUSE_ENTER_list.Num() > 0)
-//         for (int32 i = MOUSE_ENTER_list.Num() - 1; i >= 0; --i)
-//           // Make sure that this is the actual frame that's moused over
-//           // Otherwise it will react to any frame registered
-//           if (true == MOUSE_ENTER_list[i]->GetMouseOver())
-//             {MOUSE_ENTER_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
-//       break;
-//     case EventEnum::MOUSE_EXIT:
-//       if (MOUSE_EXIT_list.Num() > 0)
-//         for (int32 i = MOUSE_EXIT_list.Num() - 1; i >= 0; --i)
-//           // True because the event is fired BEFORE it's changed to false
-//           // Otherwise it will react to the wrong frames
-//           if (true == MOUSE_ENTER_list[i]->GetMouseOver())
-//             {MOUSE_EXIT_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
-//       break;
-//     case EventEnum::GAME_START:
-//       if (GAME_START_list.Num() > 0)
-//         for (int32 i = GAME_START_list.Num() - 1; i >= 0; --i)
-//             {GAME_START_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
-//       break;
-//     case EventEnum::UPDATE:
-//       if (UPDATE_list.Num() > 0)
-//         for (int32 i = UPDATE_list.Num() - 1; i >= 0; --i)
-//             {UPDATE_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
-//       break;
-//     case EventEnum::FRAME_CREATED:
-//       if (FRAME_CREATED_list.Num() > 0)
-//         for (int32 i = FRAME_CREATED_list.Num() - 1; i >= 0; --i)
-//             {FRAME_CREATED_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
-//       break;
-//     case EventEnum::WINDOW_FOCUS:
-//       if (WINDOW_FOCUS_list.Num() > 0)
-//         for (int32 i = WINDOW_FOCUS_list.Num() - 1; i >= 0; --i)
-//             {WINDOW_FOCUS_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
-//       break;
-//     case EventEnum::KEY_DOWN:
-//       if (KEY_DOWN_list.Num() > 0)
-//         for (int32 i = KEY_DOWN_list.Num() - 1; i >= 0; --i)
-//             {KEY_DOWN_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
-//       break;
-//     case EventEnum::KEY_UP:
-//       if (KEY_UP_list.Num() > 0)
-//         for (int32 i = KEY_UP_list.Num() - 1; i >= 0; --i)
-//             {KEY_UP_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
-//       break;
-//     case EventEnum::GAME_QUIT:
-//       if (GAME_QUIT_list.Num() > 0)
-//         for (int32 i = GAME_QUIT_list.Num() - 1; i >= 0; --i)
-//             {GAME_QUIT_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
-//       break;
-//     case EventEnum::MOUSE_CLICKED_DOWN:
-//       if (MOUSE_CLICKED_DOWN_list.Num() > 0)
-//         for (int32 i = MOUSE_CLICKED_DOWN_list.Num() - 1; i >= 0; --i)
-//             {MOUSE_CLICKED_DOWN_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
-//       break;
-//     case EventEnum::MOUSE_CLICKED_UP:
-//       if (MOUSE_CLICKED_UP_list.Num() > 0)
-//         for (int32 i = MOUSE_CLICKED_UP_list.Num() - 1; i >= 0; --i)
-//             {MOUSE_CLICKED_UP_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
-//       break;
-//     case EventEnum::MOUSE_MOVEMENT:
-//       if (MOUSE_MOVEMENT_list.Num() > 0)
-//         for (int32 i = MOUSE_MOVEMENT_list.Num() - 1; i >= 0; --i)
-//             {MOUSE_MOVEMENT_list[i]->OnEventFunc(MOUSE_ENTER_list[i], event);}
-//       break;
-//     default:
-//       print("No event: ", event);
-//       break;
-//   }
-// }
 
 void Frame::IterateScriptArrays()
 {
@@ -731,9 +572,23 @@ void Frame::InitializeEventList()
   EventList.Emplace("GAME_QUIT");
 }
 
-Frame* Frame::CreateFrame(FString nName = "", FString nStrata = "BACKGROUND", int32 nLevel = 0)
+Frame* Frame::CreateFrame(
+  FString type = "",
+  FString nName = "",
+  FString nStrata = "BACKGROUND",
+  int32 nLevel = 0)
 {
-  Frame* f = new Frame();
+  Frame* f;
+  
+  if (type == "") // Type wasn't given, default to basic frame
+    f = new Frame();
+  else if (type == "Display2D") // A 2D frame for the flat user interface
+    f = new Frame();
+  else if (type == "Display3D") // A 3D frame for displaying in the game world
+    f = new Frame();
+  else if (type == "Actor") // A frame to hook to an actor for events? I dunno
+    f = new Frame();
+  
   FrameList.Emplace(f);
   
   // delete f; // TODO: Move this to the right place.
@@ -762,272 +617,3 @@ Frame* Frame::CreateFrame(FString nName = "", FString nStrata = "BACKGROUND", in
 
   return f;
 }
-
-TArray<Frame*> Frame::DOWN_MouseX_list;
-TArray<Frame*> Frame::UP_MouseX_list;
-TArray<Frame*> Frame::DOWN_MouseY_list;
-TArray<Frame*> Frame::UP_MouseY_list;
-TArray<Frame*> Frame::DOWN_MouseScrollUp_list;
-TArray<Frame*> Frame::UP_MouseScrollUp_list;
-TArray<Frame*> Frame::DOWN_MouseScrollDown_list;
-TArray<Frame*> Frame::UP_MouseScrollDown_list;
-TArray<Frame*> Frame::DOWN_MouseWheelAxis_list;
-TArray<Frame*> Frame::UP_MouseWheelAxis_list;
-
-TArray<Frame*> Frame::DOWN_LeftMouseButton_list;
-TArray<Frame*> Frame::UP_LeftMouseButton_list;
-TArray<Frame*> Frame::DOWN_RightMouseButton_list;
-TArray<Frame*> Frame::UP_RightMouseButton_list;
-TArray<Frame*> Frame::DOWN_MiddleMouseButton_list;
-TArray<Frame*> Frame::UP_MiddleMouseButton_list;
-TArray<Frame*> Frame::DOWN_ThumbMouseButton_list;
-TArray<Frame*> Frame::UP_ThumbMouseButton_list;
-TArray<Frame*> Frame::DOWN_ThumbMouseButton2_list;
-TArray<Frame*> Frame::UP_ThumbMouseButton2_list;
-
-TArray<Frame*> Frame::DOWN_BackSpace_list;
-TArray<Frame*> Frame::UP_BackSpace_list;
-TArray<Frame*> Frame::DOWN_Tab_list;
-TArray<Frame*> Frame::UP_Tab_list;
-TArray<Frame*> Frame::DOWN_Enter_list;
-TArray<Frame*> Frame::UP_Enter_list;
-TArray<Frame*> Frame::DOWN_Pause_list;
-TArray<Frame*> Frame::UP_Pause_list;
-
-TArray<Frame*> Frame::DOWN_CapsLock_list;
-TArray<Frame*> Frame::UP_CapsLock_list;
-TArray<Frame*> Frame::DOWN_Escape_list;
-TArray<Frame*> Frame::UP_Escape_list;
-TArray<Frame*> Frame::DOWN_SpaceBar_list;
-TArray<Frame*> Frame::UP_SpaceBar_list;
-TArray<Frame*> Frame::DOWN_PageUp_list;
-TArray<Frame*> Frame::UP_PageUp_list;
-TArray<Frame*> Frame::DOWN_PageDown_list;
-TArray<Frame*> Frame::UP_PageDown_list;
-TArray<Frame*> Frame::DOWN_End_list;
-TArray<Frame*> Frame::UP_End_list;
-TArray<Frame*> Frame::DOWN_Home_list;
-TArray<Frame*> Frame::UP_Home_list;
-
-TArray<Frame*> Frame::DOWN_Left_list;
-TArray<Frame*> Frame::UP_Left_list;
-TArray<Frame*> Frame::DOWN_Up_list;
-TArray<Frame*> Frame::UP_Up_list;
-TArray<Frame*> Frame::DOWN_Right_list;
-TArray<Frame*> Frame::UP_Right_list;
-TArray<Frame*> Frame::DOWN_Down_list;
-TArray<Frame*> Frame::UP_Down_list;
-
-TArray<Frame*> Frame::DOWN_Insert_list;
-TArray<Frame*> Frame::UP_Insert_list;
-TArray<Frame*> Frame::DOWN_Delete_list;
-TArray<Frame*> Frame::UP_Delete_list;
-
-TArray<Frame*> Frame::DOWN_Zero_list;
-TArray<Frame*> Frame::UP_Zero_list;
-TArray<Frame*> Frame::DOWN_One_list;
-TArray<Frame*> Frame::UP_One_list;
-TArray<Frame*> Frame::DOWN_Two_list;
-TArray<Frame*> Frame::UP_Two_list;
-TArray<Frame*> Frame::DOWN_Three_list;
-TArray<Frame*> Frame::UP_Three_list;
-TArray<Frame*> Frame::DOWN_Four_list;
-TArray<Frame*> Frame::UP_Four_list;
-TArray<Frame*> Frame::DOWN_Five_list;
-TArray<Frame*> Frame::UP_Five_list;
-TArray<Frame*> Frame::DOWN_Six_list;
-TArray<Frame*> Frame::UP_Six_list;
-TArray<Frame*> Frame::DOWN_Seven_list;
-TArray<Frame*> Frame::UP_Seven_list;
-TArray<Frame*> Frame::DOWN_Eight_list;
-TArray<Frame*> Frame::UP_Eight_list;
-TArray<Frame*> Frame::DOWN_Nine_list;
-TArray<Frame*> Frame::UP_Nine_list;
-
-TArray<Frame*> Frame::DOWN_A_list;
-TArray<Frame*> Frame::UP_A_list;
-TArray<Frame*> Frame::DOWN_B_list;
-TArray<Frame*> Frame::UP_B_list;
-TArray<Frame*> Frame::DOWN_C_list;
-TArray<Frame*> Frame::UP_C_list;
-TArray<Frame*> Frame::DOWN_D_list;
-TArray<Frame*> Frame::UP_D_list;
-TArray<Frame*> Frame::DOWN_E_list;
-TArray<Frame*> Frame::UP_E_list;
-TArray<Frame*> Frame::DOWN_F_list;
-TArray<Frame*> Frame::UP_F_list;
-TArray<Frame*> Frame::DOWN_G_list;
-TArray<Frame*> Frame::UP_G_list;
-TArray<Frame*> Frame::DOWN_H_list;
-TArray<Frame*> Frame::UP_H_list;
-TArray<Frame*> Frame::DOWN_I_list;
-TArray<Frame*> Frame::UP_I_list;
-TArray<Frame*> Frame::DOWN_J_list;
-TArray<Frame*> Frame::UP_J_list;
-TArray<Frame*> Frame::DOWN_K_list;
-TArray<Frame*> Frame::UP_K_list;
-TArray<Frame*> Frame::DOWN_L_list;
-TArray<Frame*> Frame::UP_L_list;
-TArray<Frame*> Frame::DOWN_M_list;
-TArray<Frame*> Frame::UP_M_list;
-TArray<Frame*> Frame::DOWN_N_list;
-TArray<Frame*> Frame::UP_N_list;
-TArray<Frame*> Frame::DOWN_O_list;
-TArray<Frame*> Frame::UP_O_list;
-TArray<Frame*> Frame::DOWN_P_list;
-TArray<Frame*> Frame::UP_P_list;
-TArray<Frame*> Frame::DOWN_Q_list;
-TArray<Frame*> Frame::UP_Q_list;
-TArray<Frame*> Frame::DOWN_R_list;
-TArray<Frame*> Frame::UP_R_list;
-TArray<Frame*> Frame::DOWN_S_list;
-TArray<Frame*> Frame::UP_S_list;
-TArray<Frame*> Frame::DOWN_T_list;
-TArray<Frame*> Frame::UP_T_list;
-TArray<Frame*> Frame::DOWN_U_list;
-TArray<Frame*> Frame::UP_U_list;
-TArray<Frame*> Frame::DOWN_V_list;
-TArray<Frame*> Frame::UP_V_list;
-TArray<Frame*> Frame::DOWN_W_list;
-TArray<Frame*> Frame::UP_W_list;
-TArray<Frame*> Frame::DOWN_X_list;
-TArray<Frame*> Frame::UP_X_list;
-TArray<Frame*> Frame::DOWN_Y_list;
-TArray<Frame*> Frame::UP_Y_list;
-TArray<Frame*> Frame::DOWN_Z_list;
-TArray<Frame*> Frame::UP_Z_list;
-
-TArray<Frame*> Frame::DOWN_NumPadZero_list;
-TArray<Frame*> Frame::UP_NumPadZero_list;
-TArray<Frame*> Frame::DOWN_NumPadOne_list;
-TArray<Frame*> Frame::UP_NumPadOne_list;
-TArray<Frame*> Frame::DOWN_NumPadTwo_list;
-TArray<Frame*> Frame::UP_NumPadTwo_list;
-TArray<Frame*> Frame::DOWN_NumPadThree_list;
-TArray<Frame*> Frame::UP_NumPadThree_list;
-TArray<Frame*> Frame::DOWN_NumPadFour_list;
-TArray<Frame*> Frame::UP_NumPadFour_list;
-TArray<Frame*> Frame::DOWN_NumPadFive_list;
-TArray<Frame*> Frame::UP_NumPadFive_list;
-TArray<Frame*> Frame::DOWN_NumPadSix_list;
-TArray<Frame*> Frame::UP_NumPadSix_list;
-TArray<Frame*> Frame::DOWN_NumPadSeven_list;
-TArray<Frame*> Frame::UP_NumPadSeven_list;
-TArray<Frame*> Frame::DOWN_NumPadEight_list;
-TArray<Frame*> Frame::UP_NumPadEight_list;
-TArray<Frame*> Frame::DOWN_NumPadNine_list;
-TArray<Frame*> Frame::UP_NumPadNine_list;
-
-TArray<Frame*> Frame::DOWN_Multiply_list;
-TArray<Frame*> Frame::UP_Multiply_list;
-TArray<Frame*> Frame::DOWN_Add_list;
-TArray<Frame*> Frame::UP_Add_list;
-TArray<Frame*> Frame::DOWN_Subtract_list;
-TArray<Frame*> Frame::UP_Subtract_list;
-TArray<Frame*> Frame::DOWN_Decimal_list;
-TArray<Frame*> Frame::UP_Decimal_list;
-TArray<Frame*> Frame::DOWN_Divide_list;
-TArray<Frame*> Frame::UP_Divide_list;
-
-TArray<Frame*> Frame::DOWN_F1_list;
-TArray<Frame*> Frame::UP_F1_list;
-TArray<Frame*> Frame::DOWN_F2_list;
-TArray<Frame*> Frame::UP_F2_list;
-TArray<Frame*> Frame::DOWN_F3_list;
-TArray<Frame*> Frame::UP_F3_list;
-TArray<Frame*> Frame::DOWN_F4_list;
-TArray<Frame*> Frame::UP_F4_list;
-TArray<Frame*> Frame::DOWN_F5_list;
-TArray<Frame*> Frame::UP_F5_list;
-TArray<Frame*> Frame::DOWN_F6_list;
-TArray<Frame*> Frame::UP_F6_list;
-TArray<Frame*> Frame::DOWN_F7_list;
-TArray<Frame*> Frame::UP_F7_list;
-TArray<Frame*> Frame::DOWN_F8_list;
-TArray<Frame*> Frame::UP_F8_list;
-TArray<Frame*> Frame::DOWN_F9_list;
-TArray<Frame*> Frame::UP_F9_list;
-TArray<Frame*> Frame::DOWN_F10_list;
-TArray<Frame*> Frame::UP_F10_list;
-TArray<Frame*> Frame::DOWN_F11_list;
-TArray<Frame*> Frame::UP_F11_list;
-TArray<Frame*> Frame::DOWN_F12_list;
-TArray<Frame*> Frame::UP_F12_list;
-
-TArray<Frame*> Frame::DOWN_NumLock_list;
-TArray<Frame*> Frame::UP_NumLock_list;
-
-TArray<Frame*> Frame::DOWN_ScrollLock_list;
-TArray<Frame*> Frame::UP_ScrollLock_list;
-
-TArray<Frame*> Frame::DOWN_LeftShift_list;
-TArray<Frame*> Frame::UP_LeftShift_list;
-TArray<Frame*> Frame::DOWN_RightShift_list;
-TArray<Frame*> Frame::UP_RightShift_list;
-TArray<Frame*> Frame::DOWN_LeftControl_list;
-TArray<Frame*> Frame::UP_LeftControl_list;
-TArray<Frame*> Frame::DOWN_RightControl_list;
-TArray<Frame*> Frame::UP_RightControl_list;
-TArray<Frame*> Frame::DOWN_LeftAlt_list;
-TArray<Frame*> Frame::UP_LeftAlt_list;
-TArray<Frame*> Frame::DOWN_RightAlt_list;
-TArray<Frame*> Frame::UP_RightAlt_list;
-TArray<Frame*> Frame::DOWN_LeftCommand_list;
-TArray<Frame*> Frame::UP_LeftCommand_list;
-TArray<Frame*> Frame::DOWN_RightCommand_list;
-TArray<Frame*> Frame::UP_RightCommand_list;
-
-// TArray<Frame*> Frame::DOWN_Semicolon_list;
-// TArray<Frame*> Frame::UP_Semicolon_list;
-// TArray<Frame*> Frame::DOWN_Equals_list;
-// TArray<Frame*> Frame::UP_Equals_list;
-// TArray<Frame*> Frame::DOWN_Comma_list;
-// TArray<Frame*> Frame::UP_Comma_list;
-// TArray<Frame*> Frame::DOWN_Underscore_list;
-// TArray<Frame*> Frame::UP_Underscore_list;
-// TArray<Frame*> Frame::DOWN_Hyphen_list;
-// TArray<Frame*> Frame::UP_Hyphen_list;
-// TArray<Frame*> Frame::DOWN_Period_list;
-// TArray<Frame*> Frame::UP_Period_list;
-// TArray<Frame*> Frame::DOWN_Slash_list;
-// TArray<Frame*> Frame::UP_Slash_list;
-// TArray<Frame*> Frame::DOWN_Tilde_list;
-// TArray<Frame*> Frame::UP_Tilde_list;
-// TArray<Frame*> Frame::DOWN_LeftBracket_list;
-// TArray<Frame*> Frame::UP_LeftBracket_list;
-// TArray<Frame*> Frame::DOWN_LeftParantheses_list;
-// TArray<Frame*> Frame::UP_LeftParantheses_list;
-// TArray<Frame*> Frame::DOWN_Backslash_list;
-// TArray<Frame*> Frame::UP_Backslash_list;
-// TArray<Frame*> Frame::DOWN_RightBracket_list;
-// TArray<Frame*> Frame::UP_RightBracket_list;
-// TArray<Frame*> Frame::DOWN_RightParantheses_list;
-// TArray<Frame*> Frame::UP_RightParantheses_list;
-// TArray<Frame*> Frame::DOWN_Apostrophe_list;
-// TArray<Frame*> Frame::UP_Apostrophe_list;
-// TArray<Frame*> Frame::DOWN_Quote_list;
-// TArray<Frame*> Frame::UP_Quote_list;
-//
-// TArray<Frame*> Frame::DOWN_Asterix_list;
-// TArray<Frame*> Frame::UP_Asterix_list;
-// TArray<Frame*> Frame::DOWN_Ampersand_list;
-// TArray<Frame*> Frame::UP_Ampersand_list;
-// TArray<Frame*> Frame::DOWN_Caret_list;
-// TArray<Frame*> Frame::UP_Caret_list;
-// TArray<Frame*> Frame::DOWN_Dollar_list;
-// TArray<Frame*> Frame::UP_Dollar_list;
-// TArray<Frame*> Frame::DOWN_Exclamation_list;
-// TArray<Frame*> Frame::UP_Exclamation_list;
-// TArray<Frame*> Frame::DOWN_Colon_list;
-// TArray<Frame*> Frame::UP_Colon_list;
-//
-// TArray<Frame*> Frame::DOWN_A_AccentGrave_list;
-// TArray<Frame*> Frame::UP_A_AccentGrave_list;
-// TArray<Frame*> Frame::DOWN_E_AccentGrave_list;
-// TArray<Frame*> Frame::UP_E_AccentGrave_list;
-// TArray<Frame*> Frame::DOWN_E_AccentAigu_list;
-// TArray<Frame*> Frame::UP_E_AccentAigu_list;
-// TArray<Frame*> Frame::DOWN_C_Cedille_list;
-// TArray<Frame*> Frame::UP_C_Cedille_list;
-// TArray<Frame*> Frame::DOWN_Section_list;
-// TArray<Frame*> Frame::UP_Section_list;

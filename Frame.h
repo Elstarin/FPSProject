@@ -21,7 +21,7 @@ enum EventEnum
 	KEY_UP,
 	DRAWING,
 	SCORE_UPDATE,
-	// MOUSE_MOVEMENT,
+	MOUSE_MOVING,
 	
 	MOUSE_X_DOWN,
 	MOUSE_X_UP,
@@ -344,7 +344,7 @@ class FPSPROJECT_API Frame
 		void Set_GAME_START(FuncType func);
 		void Set_GAME_PAUSE(FuncType func);
 		void Set_GAME_STOP(FuncType func);
-		void Set_MOUSE_MOVEMENT(FuncType func);
+		void Set_MOUSE_MOVING(FuncType func);
 		void Set_MOUSE_X_DOWN(FuncType func);
 		void Set_MOUSE_X_UP(FuncType func);
 		void Set_MOUSE_Y_DOWN(FuncType func);
@@ -415,233 +415,6 @@ class FPSPROJECT_API Frame
 		static TArray<FString> EventList;
 	protected:
 		
-  public:
-		static TArray<Frame*> MOUSE_ENTER_list;
-		static TArray<Frame*> MOUSE_EXIT_list;
-		static TArray<Frame*> GAME_START_list;
-		static TArray<Frame*> GAME_QUIT_list;
-		static TArray<Frame*> FRAME_CREATED_list;
-		static TArray<Frame*> MOUSE_CLICKED_DOWN_list;
-		static TArray<Frame*> MOUSE_CLICKED_UP_list;
-		static TArray<Frame*> MOUSE_MOVEMENT_list;
-		static TArray<Frame*> KEY_DOWN_list;
-		static TArray<Frame*> KEY_UP_list;
-		static TArray<Frame*> UPDATE_list;
-		static TArray<Frame*> WINDOW_FOCUS_list;
-		
-		static TArray<Frame*> Frame::DOWN_MouseX_list;
-		static TArray<Frame*> Frame::UP_MouseX_list;
-		static TArray<Frame*> Frame::DOWN_MouseY_list;
-		static TArray<Frame*> Frame::UP_MouseY_list;
-		static TArray<Frame*> Frame::DOWN_MouseScrollUp_list;
-		static TArray<Frame*> Frame::UP_MouseScrollUp_list;
-		static TArray<Frame*> Frame::DOWN_MouseScrollDown_list;
-		static TArray<Frame*> Frame::UP_MouseScrollDown_list;
-		static TArray<Frame*> Frame::DOWN_MouseWheelAxis_list;
-		static TArray<Frame*> Frame::UP_MouseWheelAxis_list;
-		
-		static TArray<Frame*> Frame::DOWN_LeftMouseButton_list;
-		static TArray<Frame*> Frame::UP_LeftMouseButton_list;
-		static TArray<Frame*> Frame::DOWN_RightMouseButton_list;
-		static TArray<Frame*> Frame::UP_RightMouseButton_list;
-		static TArray<Frame*> Frame::DOWN_MiddleMouseButton_list;
-		static TArray<Frame*> Frame::UP_MiddleMouseButton_list;
-		static TArray<Frame*> Frame::DOWN_ThumbMouseButton_list;
-		static TArray<Frame*> Frame::UP_ThumbMouseButton_list;
-		static TArray<Frame*> Frame::DOWN_ThumbMouseButton2_list;
-		static TArray<Frame*> Frame::UP_ThumbMouseButton2_list;
-		
-		static TArray<Frame*> Frame::DOWN_BackSpace_list;
-		static TArray<Frame*> Frame::UP_BackSpace_list;
-		static TArray<Frame*> Frame::DOWN_Tab_list;
-		static TArray<Frame*> Frame::UP_Tab_list;
-		static TArray<Frame*> Frame::DOWN_Enter_list;
-		static TArray<Frame*> Frame::UP_Enter_list;
-		static TArray<Frame*> Frame::DOWN_Pause_list;
-		static TArray<Frame*> Frame::UP_Pause_list;
-		
-		static TArray<Frame*> Frame::DOWN_CapsLock_list;
-		static TArray<Frame*> Frame::UP_CapsLock_list;
-		static TArray<Frame*> Frame::DOWN_Escape_list;
-		static TArray<Frame*> Frame::UP_Escape_list;
-		static TArray<Frame*> Frame::DOWN_SpaceBar_list;
-		static TArray<Frame*> Frame::UP_SpaceBar_list;
-		static TArray<Frame*> Frame::DOWN_PageUp_list;
-		static TArray<Frame*> Frame::UP_PageUp_list;
-		static TArray<Frame*> Frame::DOWN_PageDown_list;
-		static TArray<Frame*> Frame::UP_PageDown_list;
-		static TArray<Frame*> Frame::DOWN_End_list;
-		static TArray<Frame*> Frame::UP_End_list;
-		static TArray<Frame*> Frame::DOWN_Home_list;
-		static TArray<Frame*> Frame::UP_Home_list;
-		
-		static TArray<Frame*> Frame::DOWN_Left_list;
-		static TArray<Frame*> Frame::UP_Left_list;
-		static TArray<Frame*> Frame::DOWN_Up_list;
-		static TArray<Frame*> Frame::UP_Up_list;
-		static TArray<Frame*> Frame::DOWN_Right_list;
-		static TArray<Frame*> Frame::UP_Right_list;
-		static TArray<Frame*> Frame::DOWN_Down_list;
-		static TArray<Frame*> Frame::UP_Down_list;
-		
-		static TArray<Frame*> Frame::DOWN_Insert_list;
-		static TArray<Frame*> Frame::UP_Insert_list;
-		static TArray<Frame*> Frame::DOWN_Delete_list;
-		static TArray<Frame*> Frame::UP_Delete_list;
-		
-		static TArray<Frame*> Frame::DOWN_Zero_list;
-		static TArray<Frame*> Frame::UP_Zero_list;
-		static TArray<Frame*> Frame::DOWN_One_list;
-		static TArray<Frame*> Frame::UP_One_list;
-		static TArray<Frame*> Frame::DOWN_Two_list;
-		static TArray<Frame*> Frame::UP_Two_list;
-		static TArray<Frame*> Frame::DOWN_Three_list;
-		static TArray<Frame*> Frame::UP_Three_list;
-		static TArray<Frame*> Frame::DOWN_Four_list;
-		static TArray<Frame*> Frame::UP_Four_list;
-		static TArray<Frame*> Frame::DOWN_Five_list;
-		static TArray<Frame*> Frame::UP_Five_list;
-		static TArray<Frame*> Frame::DOWN_Six_list;
-		static TArray<Frame*> Frame::UP_Six_list;
-		static TArray<Frame*> Frame::DOWN_Seven_list;
-		static TArray<Frame*> Frame::UP_Seven_list;
-		static TArray<Frame*> Frame::DOWN_Eight_list;
-		static TArray<Frame*> Frame::UP_Eight_list;
-		static TArray<Frame*> Frame::DOWN_Nine_list;
-		static TArray<Frame*> Frame::UP_Nine_list;
-		
-		static TArray<Frame*> Frame::DOWN_A_list;
-		static TArray<Frame*> Frame::UP_A_list;
-		static TArray<Frame*> Frame::DOWN_B_list;
-		static TArray<Frame*> Frame::UP_B_list;
-		static TArray<Frame*> Frame::DOWN_C_list;
-		static TArray<Frame*> Frame::UP_C_list;
-		static TArray<Frame*> Frame::DOWN_D_list;
-		static TArray<Frame*> Frame::UP_D_list;
-		static TArray<Frame*> Frame::DOWN_E_list;
-		static TArray<Frame*> Frame::UP_E_list;
-		static TArray<Frame*> Frame::DOWN_F_list;
-		static TArray<Frame*> Frame::UP_F_list;
-		static TArray<Frame*> Frame::DOWN_G_list;
-		static TArray<Frame*> Frame::UP_G_list;
-		static TArray<Frame*> Frame::DOWN_H_list;
-		static TArray<Frame*> Frame::UP_H_list;
-		static TArray<Frame*> Frame::DOWN_I_list;
-		static TArray<Frame*> Frame::UP_I_list;
-		static TArray<Frame*> Frame::DOWN_J_list;
-		static TArray<Frame*> Frame::UP_J_list;
-		static TArray<Frame*> Frame::DOWN_K_list;
-		static TArray<Frame*> Frame::UP_K_list;
-		static TArray<Frame*> Frame::DOWN_L_list;
-		static TArray<Frame*> Frame::UP_L_list;
-		static TArray<Frame*> Frame::DOWN_M_list;
-		static TArray<Frame*> Frame::UP_M_list;
-		static TArray<Frame*> Frame::DOWN_N_list;
-		static TArray<Frame*> Frame::UP_N_list;
-		static TArray<Frame*> Frame::DOWN_O_list;
-		static TArray<Frame*> Frame::UP_O_list;
-		static TArray<Frame*> Frame::DOWN_P_list;
-		static TArray<Frame*> Frame::UP_P_list;
-		static TArray<Frame*> Frame::DOWN_Q_list;
-		static TArray<Frame*> Frame::UP_Q_list;
-		static TArray<Frame*> Frame::DOWN_R_list;
-		static TArray<Frame*> Frame::UP_R_list;
-		static TArray<Frame*> Frame::DOWN_S_list;
-		static TArray<Frame*> Frame::UP_S_list;
-		static TArray<Frame*> Frame::DOWN_T_list;
-		static TArray<Frame*> Frame::UP_T_list;
-		static TArray<Frame*> Frame::DOWN_U_list;
-		static TArray<Frame*> Frame::UP_U_list;
-		static TArray<Frame*> Frame::DOWN_V_list;
-		static TArray<Frame*> Frame::UP_V_list;
-		static TArray<Frame*> Frame::DOWN_W_list;
-		static TArray<Frame*> Frame::UP_W_list;
-		static TArray<Frame*> Frame::DOWN_X_list;
-		static TArray<Frame*> Frame::UP_X_list;
-		static TArray<Frame*> Frame::DOWN_Y_list;
-		static TArray<Frame*> Frame::UP_Y_list;
-		static TArray<Frame*> Frame::DOWN_Z_list;
-		static TArray<Frame*> Frame::UP_Z_list;
-		
-		static TArray<Frame*> Frame::DOWN_NumPadZero_list;
-		static TArray<Frame*> Frame::UP_NumPadZero_list;
-		static TArray<Frame*> Frame::DOWN_NumPadOne_list;
-		static TArray<Frame*> Frame::UP_NumPadOne_list;
-		static TArray<Frame*> Frame::DOWN_NumPadTwo_list;
-		static TArray<Frame*> Frame::UP_NumPadTwo_list;
-		static TArray<Frame*> Frame::DOWN_NumPadThree_list;
-		static TArray<Frame*> Frame::UP_NumPadThree_list;
-		static TArray<Frame*> Frame::DOWN_NumPadFour_list;
-		static TArray<Frame*> Frame::UP_NumPadFour_list;
-		static TArray<Frame*> Frame::DOWN_NumPadFive_list;
-		static TArray<Frame*> Frame::UP_NumPadFive_list;
-		static TArray<Frame*> Frame::DOWN_NumPadSix_list;
-		static TArray<Frame*> Frame::UP_NumPadSix_list;
-		static TArray<Frame*> Frame::DOWN_NumPadSeven_list;
-		static TArray<Frame*> Frame::UP_NumPadSeven_list;
-		static TArray<Frame*> Frame::DOWN_NumPadEight_list;
-		static TArray<Frame*> Frame::UP_NumPadEight_list;
-		static TArray<Frame*> Frame::DOWN_NumPadNine_list;
-		static TArray<Frame*> Frame::UP_NumPadNine_list;
-		
-		static TArray<Frame*> Frame::DOWN_Multiply_list;
-		static TArray<Frame*> Frame::UP_Multiply_list;
-		static TArray<Frame*> Frame::DOWN_Add_list;
-		static TArray<Frame*> Frame::UP_Add_list;
-		static TArray<Frame*> Frame::DOWN_Subtract_list;
-		static TArray<Frame*> Frame::UP_Subtract_list;
-		static TArray<Frame*> Frame::DOWN_Decimal_list;
-		static TArray<Frame*> Frame::UP_Decimal_list;
-		static TArray<Frame*> Frame::DOWN_Divide_list;
-		static TArray<Frame*> Frame::UP_Divide_list;
-		
-		static TArray<Frame*> Frame::DOWN_F1_list;
-		static TArray<Frame*> Frame::UP_F1_list;
-		static TArray<Frame*> Frame::DOWN_F2_list;
-		static TArray<Frame*> Frame::UP_F2_list;
-		static TArray<Frame*> Frame::DOWN_F3_list;
-		static TArray<Frame*> Frame::UP_F3_list;
-		static TArray<Frame*> Frame::DOWN_F4_list;
-		static TArray<Frame*> Frame::UP_F4_list;
-		static TArray<Frame*> Frame::DOWN_F5_list;
-		static TArray<Frame*> Frame::UP_F5_list;
-		static TArray<Frame*> Frame::DOWN_F6_list;
-		static TArray<Frame*> Frame::UP_F6_list;
-		static TArray<Frame*> Frame::DOWN_F7_list;
-		static TArray<Frame*> Frame::UP_F7_list;
-		static TArray<Frame*> Frame::DOWN_F8_list;
-		static TArray<Frame*> Frame::UP_F8_list;
-		static TArray<Frame*> Frame::DOWN_F9_list;
-		static TArray<Frame*> Frame::UP_F9_list;
-		static TArray<Frame*> Frame::DOWN_F10_list;
-		static TArray<Frame*> Frame::UP_F10_list;
-		static TArray<Frame*> Frame::DOWN_F11_list;
-		static TArray<Frame*> Frame::UP_F11_list;
-		static TArray<Frame*> Frame::DOWN_F12_list;
-		static TArray<Frame*> Frame::UP_F12_list;
-		
-		static TArray<Frame*> Frame::DOWN_NumLock_list;
-		static TArray<Frame*> Frame::UP_NumLock_list;
-		
-		static TArray<Frame*> Frame::DOWN_ScrollLock_list;
-		static TArray<Frame*> Frame::UP_ScrollLock_list;
-		
-		static TArray<Frame*> Frame::DOWN_LeftShift_list;
-		static TArray<Frame*> Frame::UP_LeftShift_list;
-		static TArray<Frame*> Frame::DOWN_RightShift_list;
-		static TArray<Frame*> Frame::UP_RightShift_list;
-		static TArray<Frame*> Frame::DOWN_LeftControl_list;
-		static TArray<Frame*> Frame::UP_LeftControl_list;
-		static TArray<Frame*> Frame::DOWN_RightControl_list;
-		static TArray<Frame*> Frame::UP_RightControl_list;
-		static TArray<Frame*> Frame::DOWN_LeftAlt_list;
-		static TArray<Frame*> Frame::UP_LeftAlt_list;
-		static TArray<Frame*> Frame::DOWN_RightAlt_list;
-		static TArray<Frame*> Frame::UP_RightAlt_list;
-		static TArray<Frame*> Frame::DOWN_LeftCommand_list;
-		static TArray<Frame*> Frame::UP_LeftCommand_list;
-		static TArray<Frame*> Frame::DOWN_RightCommand_list;
-		static TArray<Frame*> Frame::UP_RightCommand_list;
 	public:
 		
     // void (*OnEventFunc)();
@@ -705,69 +478,12 @@ class FPSPROJECT_API Frame
     void RegisterEvent(EventEnum event);
     
     void SetParent();
-    //////////////////////////////////////////////////////////////////////////////
+    // END Set functions ///////////////////////////////////////////////////////
     
-    static Frame* CreateFrame(FString nName, FString nStrata, int32 nLevel);
+    static Frame* CreateFrame(FString type, FString nName, FString nStrata, int32 nLevel);
     
     static void IterateScriptArrays();
 		
 		static void Fire(EventEnum event);
 		static void FireTest(EventEnum event);
 };
-
-
-
-// static TArray<Frame*> Frame::DOWN_Semicolon_list;
-// static TArray<Frame*> Frame::UP_Semicolon_list;
-// static TArray<Frame*> Frame::DOWN_Equals_list;
-// static TArray<Frame*> Frame::UP_Equals_list;
-// static TArray<Frame*> Frame::DOWN_Comma_list;
-// static TArray<Frame*> Frame::UP_Comma_list;
-// static TArray<Frame*> Frame::DOWN_Underscore_list;
-// static TArray<Frame*> Frame::UP_Underscore_list;
-// static TArray<Frame*> Frame::DOWN_Hyphen_list;
-// static TArray<Frame*> Frame::UP_Hyphen_list;
-// static TArray<Frame*> Frame::DOWN_Period_list;
-// static TArray<Frame*> Frame::UP_Period_list;
-// static TArray<Frame*> Frame::DOWN_Slash_list;
-// static TArray<Frame*> Frame::UP_Slash_list;
-// static TArray<Frame*> Frame::DOWN_Tilde_list;
-// static TArray<Frame*> Frame::UP_Tilde_list;
-// static TArray<Frame*> Frame::DOWN_LeftBracket_list;
-// static TArray<Frame*> Frame::UP_LeftBracket_list;
-// static TArray<Frame*> Frame::DOWN_LeftParantheses_list;
-// static TArray<Frame*> Frame::UP_LeftParantheses_list;
-// static TArray<Frame*> Frame::DOWN_Backslash_list;
-// static TArray<Frame*> Frame::UP_Backslash_list;
-// static TArray<Frame*> Frame::DOWN_RightBracket_list;
-// static TArray<Frame*> Frame::UP_RightBracket_list;
-// static TArray<Frame*> Frame::DOWN_RightParantheses_list;
-// static TArray<Frame*> Frame::UP_RightParantheses_list;
-// static TArray<Frame*> Frame::DOWN_Apostrophe_list;
-// static TArray<Frame*> Frame::UP_Apostrophe_list;
-// static TArray<Frame*> Frame::DOWN_Quote_list;
-// static TArray<Frame*> Frame::UP_Quote_list;
-//
-// static TArray<Frame*> Frame::DOWN_Asterix_list;
-// static TArray<Frame*> Frame::UP_Asterix_list;
-// static TArray<Frame*> Frame::DOWN_Ampersand_list;
-// static TArray<Frame*> Frame::UP_Ampersand_list;
-// static TArray<Frame*> Frame::DOWN_Caret_list;
-// static TArray<Frame*> Frame::UP_Caret_list;
-// static TArray<Frame*> Frame::DOWN_Dollar_list;
-// static TArray<Frame*> Frame::UP_Dollar_list;
-// static TArray<Frame*> Frame::DOWN_Exclamation_list;
-// static TArray<Frame*> Frame::UP_Exclamation_list;
-// static TArray<Frame*> Frame::DOWN_Colon_list;
-// static TArray<Frame*> Frame::UP_Colon_list;
-//
-// static TArray<Frame*> Frame::DOWN_A_AccentGrave_list;
-// static TArray<Frame*> Frame::UP_A_AccentGrave_list;
-// static TArray<Frame*> Frame::DOWN_E_AccentGrave_list;
-// static TArray<Frame*> Frame::UP_E_AccentGrave_list;
-// static TArray<Frame*> Frame::DOWN_E_AccentAigu_list;
-// static TArray<Frame*> Frame::UP_E_AccentAigu_list;
-// static TArray<Frame*> Frame::DOWN_C_Cedille_list;
-// static TArray<Frame*> Frame::UP_C_Cedille_list;
-// static TArray<Frame*> Frame::DOWN_Section_list;
-// static TArray<Frame*> Frame::UP_Section_list;

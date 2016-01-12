@@ -144,17 +144,13 @@ void timerCallback()
 }
 
 // TArray<Frame*> TestFrameList;
-// void CreateFrameList()
-// {
-//   int32 num = 100000;
-//
-//   TestFrameList.Reserve(num);
-//   for (int32 i = 1; i <= num; i++)
-//   {
-//     auto frame = Frame::CreateFrame("Frame1", "BACKGROUND", 0);
-//     TestFrameList.Emplace(frame);
-//   }
-// }
+void CreateFrameList()
+{
+  for (int32 i = 1; i <= 10000; i++)
+  {
+    auto frame = Frame::CreateFrame("", "", "BACKGROUND", 0);
+  }
+}
 
 // void IterateFrameList()
 // {
@@ -172,70 +168,43 @@ void timerCallback()
 // void UMyStaticLibrary::profileCode()
 void UMyStaticLibrary::profileCode(UWorld* const World)
 {
-  int32 loopNum = 1;
-  // loopNum = 100;
-  // loopNum = 1000; // 1k
-  // loopNum = 10000; // 10k
-  // loopNum = 100000; // 100k
-  // loopNum = 500000; // 500k
-  // loopNum = 1000000; // 1m
-  // loopNum = 10000000; // 10m
-  loopNum = 100000000; // 100m
-  
-  // auto frame = Frame::CreateFrame("Frame1", "BACKGROUND", 0);
-  
-  // auto lambda = [](){};
-  
-  if (false){ // Toggle this to easily disable profiling
-    // print("Profiling... Iterations:", loopNum);
+  // APlayerController* PlayerCon = UObject::GetOwningPlayerController();
+  // auto PlayerCon = UGameplayStatics::GetPlayerController(World, 0);
+  // auto PlayerCon = GetWorld()->GetFirstPlayerController();
+
+  if (true) // Toggle this to easily disable profiling
+  {
+    CreateFrameList();
     
-    enum List
-    {
-      MOUSE_ENTER,
-      MOUSE_EXIT,
-      GAME_RUN,
-      GAME_LOAD,
-      LOAD_FILE,
-      DRAWING,
-      UPDATE,
-      FRAME_CREATED,
-      MOUSE_DOWN,
-      WINDOW_FOCUS,
-      WINDOW_VISIBLE,
-      KEY_DOWN,
-      KEY_UP,
-      GAME_QUIT,
-      SCORE_UPDATE,
-      MOUSE_CLICKED_DOWN,
-      MOUSE_CLICKED_UP,
-      MOUSE_UP,
-      MOUSE_MOVEMENT,
-    };
-    
-    // APlayerController* PlayerCon = UObject::GetOwningPlayerController();
-    // auto PlayerCon = UGameplayStatics::GetPlayerController(World, 0);
-    // auto PlayerCon = GetWorld()->GetFirstPlayerController();
-    
-    int32 length = 0;
-    
-    // Code to test
-    double start = TimerSystem::GetTime();
-    for (int32 i = 1; i <= loopNum; i++)
-    {
+    TimerSystem::SetTimer(1, [](){
+      int32 loopNum = 1;
+      // loopNum = 100;
+      // loopNum = 1000; // 1k
+      // loopNum = 10000; // 10k
+      loopNum = 100000; // 100k
+      // loopNum = 500000; // 500k
+      // loopNum = 1000000; // 1m
+      // loopNum = 10000000; // 10m
+      // loopNum = 100000000; // 100m
       
-    }
-    double stop = TimerSystem::GetTime();
-    
-    double totalMS = (stop - start) * 1000.f; // Total time in milliseconds
-    double MSper = totalMS / loopNum; // Milliseconds per iteration
-    double oneSecond = 1000.f / MSper; // How many iterations can be done in one second
-    double oneMS = oneSecond / 1000.f; // How many iterations can be done in one millisecond
-    
-    print("Total MS:", totalMS);
-    print("MS per:", MSper);
-    print("In 1 second:", oneSecond);
-    print("In 1 MS:", oneMS);
-    print(length);
+      // Code to test
+      double start = TimerSystem::GetTime();
+      for (int32 i = 1; i <= loopNum; i++)
+      {
+        Frame::Fire(EventEnum::GAME_PAUSE);
+      }
+      double stop = TimerSystem::GetTime();
+      
+      double totalMS = (stop - start) * 1000.f; // Total time in milliseconds
+      double MSper = totalMS / loopNum; // Milliseconds per iteration
+      double oneSecond = 1000.f / MSper; // How many iterations can be done in one second
+      double oneMS = oneSecond / 1000.f; // How many iterations can be done in one millisecond
+      
+      print("Total MS:", totalMS);
+      print("MS per:", MSper);
+      print("In 1 second:", oneSecond);
+      print("In 1 MS:", oneMS);
+    });
   }
 }
 

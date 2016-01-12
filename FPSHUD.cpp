@@ -412,7 +412,7 @@ void AFPSHUD::Startup()
   
   Frame::InitializeEventList();
   
-  auto f1 = Frame::CreateFrame("Frame1", "BACKGROUND", 0);
+  auto f1 = Frame::CreateFrame("", "Frame1", "BACKGROUND", 0);
   f1->SetPosition(200, 200);
   f1->SetSize(100, 100);
   f1->SetColor(1.f, 1.f, 1.f, 1.f);
@@ -468,7 +468,7 @@ void AFPSHUD::Startup()
   //   }
   // });
   
-  auto f2 = Frame::CreateFrame("Frame2", "BACKGROUND", 0);
+  auto f2 = Frame::CreateFrame("", "Frame2", "BACKGROUND", 0);
   f2->SetPosition(0, 0);
   f2->SetSize(200, 200);
   f2->SetColor(0, 0, 0, 1);
