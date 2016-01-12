@@ -85,6 +85,13 @@
   }
 */
 
+// Initializing a list
+/*
+  int32 tableinit[] = {4, 8, 15, 16, 23, 42};
+  TArray<int32> table;
+  table.Append(tableinit, ARRAY_COUNT(tableinit));
+*/
+
 //
 /*
 

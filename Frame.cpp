@@ -43,11 +43,191 @@ Frame::Frame()
   name = "Frame_" + FString::FromInt(count);
   // Frame* parent;
   
+  // TMap<EventEnum, FuncType> EventMap;
+  // EventMap.Emplace(EventEnum::UPDATE, UPDATE);
+  
   count++; // Track the total number of frames
 }
 
 Frame::~Frame()
 {
+}
+
+// Event setting functions /////////////////////////////////////////////////////
+void Frame::Set_MOUSE_ENTER(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::MOUSE_ENTER))
+    EventMap[EventEnum::MOUSE_ENTER] = func;
+  else
+    EventMap.Emplace(EventEnum::MOUSE_ENTER, func);
+}
+
+void Frame::Set_MOUSE_EXIT(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::MOUSE_EXIT))
+    EventMap[EventEnum::MOUSE_EXIT] = func;
+  else
+    EventMap.Emplace(EventEnum::MOUSE_EXIT, func);
+}
+
+void Frame::Set_MOUSE_CLICKED_DOWN(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::MOUSE_CLICKED_DOWN))
+    EventMap[EventEnum::MOUSE_CLICKED_DOWN] = func;
+  else
+    EventMap.Emplace(EventEnum::MOUSE_CLICKED_DOWN, func);
+}
+
+void Frame::Set_MOUSE_CLICKED_UP(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::MOUSE_CLICKED_UP))
+    EventMap[EventEnum::MOUSE_CLICKED_UP] = func;
+  else
+    EventMap.Emplace(EventEnum::MOUSE_CLICKED_UP, func);
+}
+
+void Frame::Set_UPDATE(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::UPDATE))
+    EventMap[EventEnum::UPDATE] = func;
+  else
+    EventMap.Emplace(EventEnum::UPDATE, func);
+}
+
+void Frame::Set_FRAME_CREATED(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::FRAME_CREATED))
+    EventMap[EventEnum::FRAME_CREATED] = func;
+  else
+    EventMap.Emplace(EventEnum::FRAME_CREATED, func);
+}
+
+void Frame::Set_WINDOW_FOCUS_GAINED(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::WINDOW_FOCUS_GAINED))
+    EventMap[EventEnum::WINDOW_FOCUS_GAINED] = func;
+  else
+    EventMap.Emplace(EventEnum::WINDOW_FOCUS_GAINED, func);
+}
+
+void Frame::Set_WINDOW_FOCUS_LOST(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::WINDOW_FOCUS_LOST))
+    EventMap[EventEnum::WINDOW_FOCUS_LOST] = func;
+  else
+    EventMap.Emplace(EventEnum::WINDOW_FOCUS_LOST, func);
+}
+
+void Frame::Set_KEY_DOWN(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::KEY_DOWN))
+    EventMap[EventEnum::KEY_DOWN] = func;
+  else
+    EventMap.Emplace(EventEnum::KEY_DOWN, func);
+}
+
+void Frame::Set_KEY_UP(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::KEY_UP))
+    EventMap[EventEnum::KEY_UP] = func;
+  else
+    EventMap.Emplace(EventEnum::KEY_UP, func);
+}
+
+void Frame::Set_GAME_START(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::GAME_START))
+    EventMap[EventEnum::GAME_START] = func;
+  else
+    EventMap.Emplace(EventEnum::GAME_START, func);
+}
+
+void Frame::Set_GAME_PAUSE(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::GAME_PAUSE))
+    EventMap[EventEnum::GAME_PAUSE] = func;
+  else
+    EventMap.Emplace(EventEnum::GAME_PAUSE, func);
+}
+
+void Frame::Set_GAME_STOP(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::GAME_STOP))
+    EventMap[EventEnum::GAME_STOP] = func;
+  else
+    EventMap.Emplace(EventEnum::GAME_STOP, func);
+}
+
+// void Frame::Set_MOUSE_MOVEMENT(FuncType func)
+// {
+//   if (EventMap.Contains(EventEnum::MOUSE_MOVEMENT))
+//     EventMap[EventEnum::MOUSE_MOVEMENT = func;
+//   else
+//     EventMap.Emplace(EventEnum::MOUSE_MOVEMENT, func);
+// }
+
+void Frame::Set_MOUSE_X_DOWN(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::MOUSE_X_DOWN))
+    EventMap[EventEnum::MOUSE_X_DOWN] = func;
+  else
+    EventMap.Emplace(EventEnum::MOUSE_X_DOWN, func);
+}
+
+void Frame::Set_MOUSE_X_UP(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::MOUSE_X_UP))
+    EventMap[EventEnum::MOUSE_X_UP] = func;
+  else
+    EventMap.Emplace(EventEnum::MOUSE_X_UP, func);
+}
+
+void Frame::Set_MOUSE_Y_DOWN(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::MOUSE_Y_DOWN))
+    EventMap[EventEnum::MOUSE_Y_DOWN] = func;
+  else
+    EventMap.Emplace(EventEnum::MOUSE_Y_DOWN, func);
+}
+
+void Frame::Set_MOUSE_Y_UP(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::MOUSE_Y_UP))
+    EventMap[EventEnum::MOUSE_Y_UP] = func;
+  else
+    EventMap.Emplace(EventEnum::MOUSE_Y_UP, func);
+}
+
+void Frame::Set_MOUSE_SCROLL_DOWN(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::MOUSE_SCROLL_DOWN))
+    EventMap[EventEnum::MOUSE_SCROLL_DOWN] = func;
+  else
+    EventMap.Emplace(EventEnum::MOUSE_SCROLL_DOWN, func);
+}
+
+void Frame::Set_MOUSE_SCROLL_UP(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::MOUSE_SCROLL_UP))
+    EventMap[EventEnum::MOUSE_SCROLL_UP] = func;
+  else
+    EventMap.Emplace(EventEnum::MOUSE_SCROLL_UP, func);
+}
+
+void Frame::Set_MOUSE_AXIS_DOWN(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::MOUSE_AXIS_DOWN))
+    EventMap[EventEnum::MOUSE_AXIS_DOWN] = func;
+  else
+    EventMap.Emplace(EventEnum::MOUSE_AXIS_DOWN, func);
+}
+
+void Frame::Set_MOUSE_AXIS_UP(FuncType func)
+{
+  if (EventMap.Contains(EventEnum::MOUSE_AXIS_UP))
+    EventMap[EventEnum::MOUSE_AXIS_UP] = func;
+  else
+    EventMap.Emplace(EventEnum::MOUSE_AXIS_UP, func);
 }
 
 // Get functions /////////////////////////////////////////////////////////////
@@ -373,67 +553,73 @@ void Frame::OnEvent(void (*func)(Frame*, EventEnum))
 
 void Frame::Fire(EventEnum event)
 {
-  switch (event)
-  {
-    case EventEnum::MOUSE_ENTER:
-      for (int32 i = 0; i < FrameList.Num(); i++)
-        if (FrameList[i]->MOUSE_ENTER) FrameList[i]->MOUSE_ENTER();
-      break;
-    case EventEnum::MOUSE_EXIT:
-      for (int32 i = 0; i < FrameList.Num(); i++)
-        if (FrameList[i]->MOUSE_EXIT) FrameList[i]->MOUSE_EXIT();
-      break;
-    case EventEnum::UPDATE:
-      for (int32 i = 0; i < FrameList.Num(); i++)
-        if (FrameList[i]->UPDATE) FrameList[i]->UPDATE();
-      break;
-    case EventEnum::FRAME_CREATED:
-      for (int32 i = 0; i < FrameList.Num(); i++)
-        if (FrameList[i]->FRAME_CREATED) FrameList[i]->FRAME_CREATED();
-      break;
-    case EventEnum::WINDOW_FOCUS_GAINED:
-      for (int32 i = 0; i < FrameList.Num(); i++)
-        if (FrameList[i]->WINDOW_FOCUS_GAINED) FrameList[i]->WINDOW_FOCUS_GAINED();
-      break;
-    case EventEnum::WINDOW_FOCUS_LOST:
-      for (int32 i = 0; i < FrameList.Num(); i++)
-        if (FrameList[i]->WINDOW_FOCUS_LOST) FrameList[i]->WINDOW_FOCUS_LOST();
-      break;
-    case EventEnum::KEY_DOWN:
-      for (int32 i = 0; i < FrameList.Num(); i++)
-        if (FrameList[i]->KEY_DOWN) FrameList[i]->KEY_DOWN();
-      break;
-    case EventEnum::KEY_UP:
-      for (int32 i = 0; i < FrameList.Num(); i++)
-        if (FrameList[i]->KEY_UP) FrameList[i]->KEY_UP();
-      break;
-    case EventEnum::GAME_START:
-      for (int32 i = 0; i < FrameList.Num(); i++)
-        if (FrameList[i]->GAME_START) FrameList[i]->GAME_START();
-      break;
-    case EventEnum::GAME_PAUSE:
-      for (int32 i = 0; i < FrameList.Num(); i++)
-        if (FrameList[i]->GAME_PAUSE) FrameList[i]->GAME_PAUSE();
-      break;
-    case EventEnum::GAME_STOP:
-      for (int32 i = 0; i < FrameList.Num(); i++)
-        if (FrameList[i]->GAME_STOP) FrameList[i]->GAME_STOP();
-      break;
-    case EventEnum::MOUSE_CLICKED_DOWN:
-      for (int32 i = 0; i < FrameList.Num(); i++)
-        if (FrameList[i]->MOUSE_CLICKED_DOWN) FrameList[i]->MOUSE_CLICKED_DOWN();
-      break;
-    case EventEnum::MOUSE_CLICKED_UP:
-      for (int32 i = 0; i < FrameList.Num(); i++)
-        if (FrameList[i]->MOUSE_CLICKED_UP) FrameList[i]->MOUSE_CLICKED_UP();
-      break;
-    case EventEnum::MOUSE_MOVEMENT:
-      for (int32 i = 0; i < FrameList.Num(); i++)
-        if (FrameList[i]->MOUSE_MOVEMENT) FrameList[i]->MOUSE_MOVEMENT();
-      break;
-    default:
-      break;
-  }
+  for (int32 i = 0; i < FrameList.Num(); i++)
+    for (auto& element : FrameList[i]->EventMap)
+      if ((element.Key == event) && (element.Value))
+        element.Value();
+  
+  
+  // switch (event)
+  // {
+  //   case EventEnum::MOUSE_ENTER:
+  //     for (int32 i = 0; i < FrameList.Num(); i++)
+  //       if (FrameList[i]->MOUSE_ENTER) FrameList[i]->MOUSE_ENTER();
+  //     break;
+  //   case EventEnum::MOUSE_EXIT:
+  //     for (int32 i = 0; i < FrameList.Num(); i++)
+  //       if (FrameList[i]->MOUSE_EXIT) FrameList[i]->MOUSE_EXIT();
+  //     break;
+  //   case EventEnum::UPDATE:
+  //     for (int32 i = 0; i < FrameList.Num(); i++)
+  //       if (FrameList[i]->UPDATE) FrameList[i]->UPDATE();
+  //     break;
+  //   case EventEnum::FRAME_CREATED:
+  //     for (int32 i = 0; i < FrameList.Num(); i++)
+  //       if (FrameList[i]->FRAME_CREATED) FrameList[i]->FRAME_CREATED();
+  //     break;
+  //   case EventEnum::WINDOW_FOCUS_GAINED:
+  //     for (int32 i = 0; i < FrameList.Num(); i++)
+  //       if (FrameList[i]->WINDOW_FOCUS_GAINED) FrameList[i]->WINDOW_FOCUS_GAINED();
+  //     break;
+  //   case EventEnum::WINDOW_FOCUS_LOST:
+  //     for (int32 i = 0; i < FrameList.Num(); i++)
+  //       if (FrameList[i]->WINDOW_FOCUS_LOST) FrameList[i]->WINDOW_FOCUS_LOST();
+  //     break;
+  //   case EventEnum::KEY_DOWN:
+  //     for (int32 i = 0; i < FrameList.Num(); i++)
+  //       if (FrameList[i]->KEY_DOWN) FrameList[i]->KEY_DOWN();
+  //     break;
+  //   case EventEnum::KEY_UP:
+  //     for (int32 i = 0; i < FrameList.Num(); i++)
+  //       if (FrameList[i]->KEY_UP) FrameList[i]->KEY_UP();
+  //     break;
+  //   case EventEnum::GAME_START:
+  //     for (int32 i = 0; i < FrameList.Num(); i++)
+  //       if (FrameList[i]->GAME_START) FrameList[i]->GAME_START();
+  //     break;
+  //   case EventEnum::GAME_PAUSE:
+  //     for (int32 i = 0; i < FrameList.Num(); i++)
+  //       if (FrameList[i]->GAME_PAUSE) FrameList[i]->GAME_PAUSE();
+  //     break;
+  //   case EventEnum::GAME_STOP:
+  //     for (int32 i = 0; i < FrameList.Num(); i++)
+  //       if (FrameList[i]->GAME_STOP) FrameList[i]->GAME_STOP();
+  //     break;
+  //   case EventEnum::MOUSE_CLICKED_DOWN:
+  //     for (int32 i = 0; i < FrameList.Num(); i++)
+  //       if (FrameList[i]->MOUSE_CLICKED_DOWN) FrameList[i]->MOUSE_CLICKED_DOWN();
+  //     break;
+  //   case EventEnum::MOUSE_CLICKED_UP:
+  //     for (int32 i = 0; i < FrameList.Num(); i++)
+  //       if (FrameList[i]->MOUSE_CLICKED_UP) FrameList[i]->MOUSE_CLICKED_UP();
+  //     break;
+  //   case EventEnum::MOUSE_MOVEMENT:
+  //     for (int32 i = 0; i < FrameList.Num(); i++)
+  //       if (FrameList[i]->MOUSE_MOVEMENT) FrameList[i]->MOUSE_MOVEMENT();
+  //     break;
+  //   default:
+  //     break;
+  // }
 }
 
 // void Frame::Fire(EventEnum event)

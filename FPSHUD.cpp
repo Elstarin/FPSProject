@@ -424,9 +424,21 @@ void AFPSHUD::Startup()
   
   f1->Set_UPDATE([]()
   {
-    print("Update!");
+    print("UPDATE!");
   });
+  
+  f1->Set_MOUSE_EXIT([]()
+  {
+    print("MOUSE_EXIT 1!");
+  });
+  
+  f1->Set_MOUSE_EXIT([]()
+  {
+    print("MOUSE_EXIT 2!");
+  });
+  
   Frame::Fire(EventEnum::UPDATE);
+  Frame::Fire(EventEnum::MOUSE_EXIT);
   
   // f1->RegisterEvent(MOUSE_ENTER);
   // f1->RegisterEvent(MOUSE_EXIT);

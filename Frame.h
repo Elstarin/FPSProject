@@ -21,7 +21,16 @@ enum EventEnum
 	KEY_UP,
 	DRAWING,
 	SCORE_UPDATE,
-	MOUSE_MOVEMENT,
+	// MOUSE_MOVEMENT,
+	
+	MOUSE_X_DOWN,
+	MOUSE_X_UP,
+	MOUSE_Y_DOWN,
+	MOUSE_Y_UP,
+	MOUSE_SCROLL_DOWN,
+	MOUSE_SCROLL_UP,
+	MOUSE_AXIS_DOWN,
+	MOUSE_AXIS_UP,
 
 	// Key events
 	KEY_DOWN_MouseX,
@@ -319,62 +328,42 @@ class FPSPROJECT_API Frame
 	// Sockets
 	private:
 		typedef void (*FuncType)();
-		void (*MOUSE_ENTER)();
-		void (*MOUSE_EXIT)();
-		void (*MOUSE_CLICKED_DOWN)();
-		void (*MOUSE_CLICKED_UP)();
-		void (*UPDATE)();
-		void (*FRAME_CREATED)();
-		void (*WINDOW_FOCUS_GAINED)();
-		void (*WINDOW_FOCUS_LOST)();
-		void (*KEY_DOWN)();
-		void (*KEY_UP)();
-		void (*GAME_START)();
-		void (*GAME_PAUSE)();
-		void (*GAME_STOP)();
-		void (*MOUSE_MOVEMENT)();
 	public:
-		void Set_MOUSE_ENTER(FuncType func){MOUSE_ENTER = func;}
-		void Fire_MOUSE_ENTER() const {MOUSE_ENTER();}
+		TMap<EventEnum, FuncType> EventMap;
 		
-		void Set_MOUSE_EXIT(FuncType func){MOUSE_EXIT = func;}
-		void Fire_MOUSE_EXIT() const {MOUSE_EXIT();}
+		void Set_MOUSE_ENTER(FuncType func);
+		void Set_MOUSE_EXIT(FuncType func);
+		void Set_MOUSE_CLICKED_DOWN(FuncType func);
+		void Set_MOUSE_CLICKED_UP(FuncType func);
+		void Set_UPDATE(FuncType func);
+		void Set_FRAME_CREATED(FuncType func);
+		void Set_WINDOW_FOCUS_GAINED(FuncType func);
+		void Set_WINDOW_FOCUS_LOST(FuncType func);
+		void Set_KEY_DOWN(FuncType func);
+		void Set_KEY_UP(FuncType func);
+		void Set_GAME_START(FuncType func);
+		void Set_GAME_PAUSE(FuncType func);
+		void Set_GAME_STOP(FuncType func);
+		void Set_MOUSE_MOVEMENT(FuncType func);
+		void Set_MOUSE_X_DOWN(FuncType func);
+		void Set_MOUSE_X_UP(FuncType func);
+		void Set_MOUSE_Y_DOWN(FuncType func);
+		void Set_MOUSE_Y_UP(FuncType func);
+		void Set_MOUSE_SCROLL_DOWN(FuncType func);
+		void Set_MOUSE_SCROLL_UP(FuncType func);
+		void Set_MOUSE_AXIS_DOWN(FuncType func);
+		void Set_MOUSE_AXIS_UP(FuncType func);
 		
-		void Set_MOUSE_CLICKED_DOWN(FuncType func){MOUSE_CLICKED_DOWN = func;}
-		void Fire_MOUSE_CLICKED_DOWN() const {MOUSE_CLICKED_DOWN();}
-		
-		void Set_MOUSE_CLICKED_UP(FuncType func){MOUSE_CLICKED_UP = func;}
-		void Fire_MOUSE_CLICKED_UP() const {MOUSE_CLICKED_UP();}
-		
-		void Set_UPDATE(FuncType func){UPDATE = func;}
-		void Fire_UPDATE() const {UPDATE();}
-		
-		void Set_FRAME_CREATED(FuncType func){FRAME_CREATED = func;}
-		void Fire_FRAME_CREATED() const {FRAME_CREATED();}
-		
-		void Set_WINDOW_FOCUS_GAINED(FuncType func){WINDOW_FOCUS_GAINED = func;}
-		void Fire_WINDOW_FOCUS_GAINED() const {WINDOW_FOCUS_GAINED();}
-		
-		void Set_WINDOW_FOCUS_LOST(FuncType func){WINDOW_FOCUS_LOST = func;}
-		void Fire_WINDOW_FOCUS_LOST() const {WINDOW_FOCUS_LOST();}
-		
-		void Set_KEY_DOWN(FuncType func){KEY_DOWN = func;}
-		void Fire_KEY_DOWN() const {KEY_DOWN();}
-		
-		void Set_KEY_UP(FuncType func){KEY_UP = func;}
-		void Fire_KEY_UP() const {KEY_UP();}
-		
-		void Set_GAME_START(FuncType func){GAME_START = func;}
-		void Fire_GAME_START() const {GAME_START();}
-		
-		void Set_GAME_PAUSE(FuncType func){GAME_PAUSE = func;}
-		void Fire_GAME_PAUSE() const {GAME_PAUSE();}
-		
-		void Set_GAME_STOP(FuncType func){GAME_STOP = func;}
-		void Fire_GAME_STOP() const {GAME_STOP();}
-		
-		void Set_MOUSE_MOVEMENT(FuncType func){MOUSE_MOVEMENT = func;}
-		void Fire_MOUSE_MOVEMENT() const {MOUSE_MOVEMENT();}
+		// KEY_DOWN_MouseX,
+		// KEY_UP_MouseX,
+		// KEY_DOWN_MouseY,
+		// KEY_UP_MouseY,
+		// KEY_DOWN_MouseScrollUp,
+		// KEY_UP_MouseScrollUp,
+		// KEY_DOWN_MouseScrollDown,
+		// KEY_UP_MouseScrollDown,
+		// KEY_DOWN_MouseWheelAxis,
+		// KEY_UP_MouseWheelAxis,
 	private:
 		float w, h;
 		float x, y;
