@@ -327,7 +327,7 @@ class FPSPROJECT_API Frame
 {
 	// Sockets
 	private:
-		typedef void (*FuncType)();
+		typedef void (*FuncType)(Frame*);
 	public:
 		TMap<EventEnum, FuncType> EventMap;
 		
@@ -379,11 +379,6 @@ class FPSPROJECT_API Frame
 		static int32 count;
 		static TArray<Frame*> FrameList; // All frames are stored in here
 		
-		enum ScriptTypes
-		{
-		  OnUpdate,
-		};
-		
 		enum AnchorPoints
 		{
 			TOPLEFT,
@@ -409,27 +404,30 @@ class FPSPROJECT_API Frame
 			Strata(){}
 		};
 		
-		typedef void (*Scripts)();
+		struct ScriptStruct
+		{
+			Frame* frame;
+			void (*function)(Frame*);
+		};
 		
-		static TArray<Scripts> OnUpdateList;
+		static TArray<ScriptStruct> OnUpdateList;
 		static TArray<FString> EventList;
 	protected:
 		
 	public:
-		
-    // void (*OnEventFunc)();
-    void (*OnEventFunc)(Frame* f, EventEnum event);
     static const FString strataList[5];
     
     static TMap<FString, Strata> StrataMap;
     static TArray<FrameText> TextList;
+		
+		void OnUpdate(FuncType func);
     
     Frame();
     ~Frame();
     
-    static void InitializeEventList();
-    
-    // Get functions /////////////////////////////////////////////////////////////
+		/*--------------------------------------------------------------------------
+				Get functions
+		--------------------------------------------------------------------------*/
     float GetWidth() const;
     float GetHeight() const;
     float GetSize() const;
@@ -447,10 +445,10 @@ class FPSPROJECT_API Frame
     FString GetStrata() const;
     FString GetName() const;
     Frame* GetParent() const;
-    // Frame& GetPtr() const;
-    //////////////////////////////////////////////////////////////////////////////
-    
-    // Set functions /////////////////////////////////////////////////////////////
+		    
+		/*--------------------------------------------------------------------------
+				Set functions
+		--------------------------------------------------------------------------*/
     void SetWidth(float nW);
     void SetHeight(float nH);
     void SetSize(float nW, float nH);
@@ -462,28 +460,17 @@ class FPSPROJECT_API Frame
     void SetType(FString nType);
     void SetShown(bool nVisibility);
     void SetMouseOver(bool nMouseOver);
-    
-    void SetScript(ScriptTypes script, void (*func)());
-    
-    void OnEvent(void (*func)(Frame*, EventEnum));
-    
     void SetColor(float nR = 1.f, float nG = 1.f, float nB = 1.f, float nA = 1.f);
-    
     void SetAlpha(float nA = 1.f);
-    
     void SetLevel(int32 nLevel);
-    
     void SetStrata(FString nStrata);
-    
-    void RegisterEvent(EventEnum event);
-    
     void SetParent();
-    // END Set functions ///////////////////////////////////////////////////////
-    
-    static Frame* CreateFrame(FString type, FString nName, FString nStrata, int32 nLevel);
-    
-    static void IterateScriptArrays();
 		
+		/*--------------------------------------------------------------------------
+				Misc frame functions
+		--------------------------------------------------------------------------*/
+    static Frame* CreateFrame(FString nType, FString nName, FString nStrata, int32 nLevel);
+    static void IterateOnUpdateList();
 		static void Fire(EventEnum event);
-		static void FireTest(EventEnum event);
+		void FireToFrame(EventEnum event);
 };

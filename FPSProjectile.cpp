@@ -9,7 +9,8 @@ AFPSProjectile::AFPSProjectile(){
 	PrimaryActorTick.bCanEverTick = true;
 }
 
-AFPSProjectile::AFPSProjectile(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer){
+AFPSProjectile::AFPSProjectile(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{
 	// Projectile sphere /////////////////////////////////////////////////////////
 	
 	// Use a sphere as a simple collision representation

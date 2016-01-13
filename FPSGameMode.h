@@ -6,14 +6,16 @@
 #include "FPSGameMode.generated.h"
 
 // Enum to store the current state of gameplay
-enum class EFPSProjectPlayState : uint8{
+enum class EFPSProjectPlayState : uint8
+{
 	EPlaying,
 	EGameOver,
 	EUnknown
 };
 
 UCLASS()
-class FPSPROJECT_API AFPSGameMode : public AGameMode{
+class FPSPROJECT_API AFPSGameMode : public AGameMode
+{
 	GENERATED_BODY()
 	
 	AFPSGameMode(const FObjectInitializer& ObjectInitializer);

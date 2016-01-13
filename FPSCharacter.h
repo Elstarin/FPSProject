@@ -8,7 +8,6 @@
 UCLASS()
 class FPSPROJECT_API AFPSCharacter : public ACharacter{
 	GENERATED_BODY()
-	
 public:
 	// Sets default values for this character's properties
 	AFPSCharacter();
@@ -82,6 +81,14 @@ public:
 	
 	float fForwardSpeedMult = 1.0;
 	float fSideSpeedMult = 1.0;
+	
+	/** Player collision component */
+	UPROPERTY(VisibleDefaultsOnly, Category=PlayerMesh)
+	USphereComponent* CollisionComp;
+	
+	/** Called when the player hits something */
+	UFUNCTION()
+	void OnHit(class AActor* OtherActor, class UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit);
 
 protected:
 	// /** Called when we press a key, to collect any batteries inside the SphereComponent. */

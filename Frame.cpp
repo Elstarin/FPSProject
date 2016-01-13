@@ -9,7 +9,7 @@ const FString Frame::strataList[5] = {"BACKGROUND", "LOW", "MEDIUM", "HIGH", "OV
 
 TArray<Frame*> Frame::FrameList;
 TArray<Frame*> Frame::Level::FrameList;
-TArray<Frame::Scripts> Frame::OnUpdateList;
+TArray<Frame::ScriptStruct> Frame::OnUpdateList;
 TMap<int32, Frame::Level> Frame::Strata::LevelMap;
 
 Frame::Frame()
@@ -40,22 +40,23 @@ Frame::~Frame()
 {
 }
 
-class Actor : Frame
+class FrameActor : public Frame
 {
 	
 };
 
-class Display3D : Frame
+class Frame3D : public Frame
 {
 	
 };
 
-class Display2D : Frame
+class Frame2D : public Frame
 {
 	
 };
-
-// Event setting functions /////////////////////////////////////////////////////
+/*------------------------------------------------------------------------------
+		Event setting functions
+------------------------------------------------------------------------------*/
 void Frame::Set_MOUSE_ENTER(FuncType func)
 {
   if (EventMap.Contains(EventEnum::MOUSE_ENTER))
@@ -231,8 +232,21 @@ void Frame::Set_MOUSE_AXIS_UP(FuncType func)
   else
     EventMap.Emplace(EventEnum::MOUSE_AXIS_UP, func);
 }
+/*------------------------------------------------------------------------------
+		Special script events
+------------------------------------------------------------------------------*/
+void Frame::OnUpdate(FuncType func)
+{
+  ScriptStruct script;
+  script.frame = this;
+  script.function = func;
+  
+  OnUpdateList.Emplace(script);
+}
 
-// Get functions /////////////////////////////////////////////////////////////
+/*------------------------------------------------------------------------------
+    Get functions
+------------------------------------------------------------------------------*/
 float Frame::GetWidth() const {return w;}
 float Frame::GetHeight() const {return h;}
 float Frame::GetSize() const {return w, h;}
@@ -251,9 +265,13 @@ FString Frame::GetStrata() const {return strata;}
 FString Frame::GetName() const {return name;}
 Frame* Frame::GetParent() const {return parent;}
 // Frame& Frame::GetPtr(){return *f;}
-// END get functions ///////////////////////////////////////////////////////////
+/*------------------------------------------------------------------------------
+    END get functions
+------------------------------------------------------------------------------*/
 
-// Set functions ///////////////////////////////////////////////////////////////
+/*------------------------------------------------------------------------------
+    Set functions
+------------------------------------------------------------------------------*/
 void Frame::SetWidth(float nW){w = nW;}
 void Frame::SetHeight(float nH){h = nH;}
 void Frame::SetSize(float nW, float nH){w = nW; h = nH;}
@@ -330,24 +348,9 @@ void Frame::SetStrata(FString nStrata)
 void Frame::SetParent()
 {
 }
-
-void Frame::SetScript(ScriptTypes script, void (*func)())
-{
-  switch (script)
-  {
-    case OnUpdate:
-      OnUpdateList.Emplace(func);
-      break;
-    default:
-      break;
-  }
-}
-// END Set functions ///////////////////////////////////////////////////////////
-
-void Frame::OnEvent(void (*func)(Frame*, EventEnum))
-{
-  OnEventFunc = func;
-}
+/*------------------------------------------------------------------------------
+    END Set functions
+------------------------------------------------------------------------------*/
 
 // bool bEventList[] = {
 //   MOUSE_ENTER,
@@ -506,8 +509,17 @@ void Frame::OnEvent(void (*func)(Frame*, EventEnum))
 //   KEY_UP_Z,
 // };
 
+void Frame::FireToFrame(EventEnum event)
+{
+  if (this->EventMap.Contains(event)) // Check if it has the event
+  {
+    this->EventMap[event](this); // Call the event
+  }
+}
+
 void Frame::Fire(EventEnum event)
 {
+  // print("Event:", event);
   switch (event) // Event override behavior can go in here
   {
     case EventEnum::SCORE_UPDATE:
@@ -545,49 +557,36 @@ void Frame::Fire(EventEnum event)
       {
         if (f->EventMap.Contains(event)) // Check if they have the event
         {
-          f->EventMap[event](); // Call the event
+          f->EventMap[event](f); // Call the event
         }
       }
   }
 }
 
-void Frame::IterateScriptArrays()
+void Frame::IterateOnUpdateList()
 {
-  for (int32 i = OnUpdateList.Num() - 1; i >= 0; --i)
-  {
-    OnUpdateList[i]();
-  }
-}
-
-void Frame::InitializeEventList()
-{
-  EventList.Empty();
-
-  EventList.Emplace("FIRING");
-  EventList.Emplace("MOUSE_ENTER");
-  EventList.Emplace("MOUSE_EXIT");
-  EventList.Emplace("MOUSE_MOVEMENT");
-  EventList.Emplace("MOUSE_CLICK_DOWN");
-  EventList.Emplace("MOUSE_CLICK_UP");
-  EventList.Emplace("GAME_QUIT");
+  // for (int32 i = 0; i < OnUpdateList.Num(); i++)
+  // {
+  //   OnUpdateList[i].function(OnUpdateList[i].frame);
+  // }
 }
 
 Frame* Frame::CreateFrame(
-  FString type = "",
+  FString nType = "",
   FString nName = "",
   FString nStrata = "BACKGROUND",
   int32 nLevel = 0)
 {
-  Frame* f;
+  Frame* f; // The variable to hold the new frame
   
-  if (type == "") // Type wasn't given, default to basic frame
+  if (nType == "") // Type wasn't given, default to basic frame
     f = new Frame();
-  else if (type == "Display2D") // A 2D frame for the flat user interface
-    f = new Frame();
-  else if (type == "Display3D") // A 3D frame for displaying in the game world
-    f = new Frame();
-  else if (type == "Actor") // A frame to hook to an actor for events? I dunno
-    f = new Frame();
+  else if (nType == "2D") // A 2D frame for the flat user interface
+    f = new Frame2D();
+  else if (nType == "3D") // A 3D frame for displaying in the game world
+    f = new Frame3D();
+  else if (nType == "Actor") // A frame to hook to an actor for events? I dunno
+    f = new FrameActor();
   
   FrameList.Emplace(f);
   
@@ -597,6 +596,7 @@ Frame* Frame::CreateFrame(
   if (nName == "") f->SetName("Frame_" + FString::FromInt(count));
   else f->SetName(nName);
   
+  f->type = nType;
   f->strata = nStrata;
   f->level = nLevel;
 

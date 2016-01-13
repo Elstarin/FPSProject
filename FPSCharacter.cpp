@@ -86,7 +86,8 @@ class Crusader : public PlayerChar
 };
 
 // Sets default values
-AFPSCharacter::AFPSCharacter(){
+AFPSCharacter::AFPSCharacter()
+{
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -103,8 +104,77 @@ void AFPSCharacter::Tick(float DeltaTime)
 	Super::Tick( DeltaTime );
 }
 
-AFPSCharacter::AFPSCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+void AnimationStuff()
 {
+	// Set a UPROPERTY for your BlendSpace to be set in the Editor:
+	// UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Anims")
+	// UBlendSpace1D *BlendSpace;
+	
+	// Montage_Play
+	// Montage_JumpToSection
+	
+	// PlaySlotAnimationAsDynamicMontage
+		// BlendInTime
+		// BlendOutTime
+		// PlayRate
+		// LoopCount
+		
+	// ASkeletalMeshActor *Skel = Cast<ASkeletalMeshActor>(MyActor);
+	// if (Skel)
+	// {
+	// 	USkeletalMeshComponent *Mesh = Skel->GetSkeletalMeshComponent();
+	// 	if (Mesh)
+	// 	{
+	// 		Mesh->PlayAnimation(BlendSpace, true);
+	// 		FVector BlendParams(50.0f, 0.0f, 0.0f);
+	// 		Mesh->GetSingleNodeInstance()->SetBlendSpaceInput(BlendParams);
+	// 	}
+	// }
+	
+	// // Play an animation in a slot:
+	// UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Anims")
+	// UAnimSequence *MyAnimSequence;
+	//
+	// USkeletalMeshComponent *Mesh = MyActor->FindComponentByClass<USkeletalMeshComponent>();
+	// if (Mesh)
+	// {
+	// 	UAnimInstance *AnimInst = Mesh->GetAnimInstance();
+	//
+	// 	if (AnimInst)
+	// 	{
+	// 		AnimInst->PlaySlotAnimationAsDynamicMontage(MyAnimSequence, TEXT("UpperBody"), 0.1f, 0.1f, 1.0f, 30.0f);
+	// 	}
+	// }
+	
+	// To Play a simple full body animation and stop at the end:
+	// MyAnimTimer = AnimInstance->Montage_Play(MyMontage);
+	// GetWorldTimerManager().SetTimer(PauseMontageTimerHandle, this, &MyActor::PauseMontageFunc, MyAnimTimer, false);
+	
+	// In MyActor::PauseMontageFunc:
+	// AnimInst->Montage_Pause();
+	
+	// To Play a simple full body animation and jump ahead to a section. Montage_Play(anim, play speed) and Montage_JumpToSection.
+}
+
+AFPSCharacter::AFPSCharacter(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
+{	
+	// Use a sphere as a simple collision representation
+	CollisionComp = ObjectInitializer.CreateDefaultSubobject<USphereComponent>(this, TEXT("SphereComp"));
+	CollisionComp->InitSphereRadius(50.0f);
+	// RootComponent = CollisionComp;
+	
+	// // Create and position a mesh component so we can see where our sphere is
+	// UStaticMeshComponent* SphereVisual = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("VisualRepresentation"));
+	// SphereVisual->AttachTo(RootComponent);
+	// static ConstructorHelpers::FObjectFinder<UStaticMesh> SphereVisualAsset(TEXT("/Game/StarterContent/Shapes/Shape_Sphere.Shape_Sphere"));
+	//
+	// if (SphereVisualAsset.Succeeded())
+	// {
+	// 	SphereVisual->SetStaticMesh(SphereVisualAsset.Object);
+	// 	SphereVisual->SetRelativeLocation(FVector(0.0f, 0.0f, -40.0f));
+	// 	SphereVisual->SetWorldScale3D(FVector(0.8f));
+	// }
+	
 	// EventHandlerComponent->OnLevelComplete.Broadcast(LevelIndex);
 	
 	OnActorBeginOverlap.AddDynamic(this, &AFPSCharacter::OnOverlap);
@@ -134,7 +204,8 @@ AFPSCharacter::AFPSCharacter(const FObjectInitializer& ObjectInitializer) : Supe
 }
 
 // Called to bind functionality to input
-void AFPSCharacter::SetupPlayerInputComponent(class UInputComponent* InputComponent){
+void AFPSCharacter::SetupPlayerInputComponent(class UInputComponent* InputComponent)
+{
 	Super::SetupPlayerInputComponent(InputComponent);
 
 	// set up gameplay key bindings
@@ -161,7 +232,7 @@ void AFPSCharacter::Pitch(float amount)
 }
 
 void AFPSCharacter::MoveForward(float Value){
-	if ( (Controller != NULL) && (Value != 0.0f) )
+	if ((Controller != NULL) && (Value != 0.0f))
 	{
 		Value = Value * fForwardSpeedMult;
 		
@@ -169,7 +240,7 @@ void AFPSCharacter::MoveForward(float Value){
 		FRotator Rotation = Controller->GetControlRotation();
 		
 		// Limit pitch when walking or falling
-		if (GetCharacterMovement()->IsMovingOnGround() || GetCharacterMovement()->IsFalling() )
+		if (GetCharacterMovement()->IsMovingOnGround() || GetCharacterMovement()->IsFalling())
 		{
 			Rotation.Pitch = 0.0f;
 		}
@@ -238,8 +309,9 @@ void AFPSCharacter::OnFire(){
 	}
 }
 
-void AFPSCharacter::OnOverlap(AActor* OtherActor){
-	print("OVERLAP:", OtherActor, GetDisplay);
+void AFPSCharacter::OnOverlap(AActor* OtherActor)
+{
+	print("OVERLAP:", OtherActor);
 	// GetDisplay()
 	
 	// APlayerController* PController = GetWorld()->GetFirstPlayerController();
@@ -253,3 +325,17 @@ void AFPSCharacter::OnOverlap(AActor* OtherActor){
 }
 
 // EventHandlerComponent->OnLevelComplete.AddDynamic(this, &MyListenerClass::OnLevelCompleteHandler);
+
+void AFPSCharacter::OnHit(AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+	print("Player OnHit!");
+	
+	// If it exists and isn't itself
+	if (OtherActor && (OtherActor != this) && (OtherComp != nullptr)){
+		// If it has physics (AKA can we push it back?)
+		if (OtherComp->IsSimulatingPhysics())
+		{
+			// OtherComp->AddImpulseAtLocation(ProjectileMovement->Velocity * 100.0f, Hit.ImpactPoint);
+		}
+	}
+}

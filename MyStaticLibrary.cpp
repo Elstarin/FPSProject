@@ -138,11 +138,6 @@ int32 UMyStaticLibrary::ComplicatedGameDataAnalysis(){
         return 9000;
 }
 
-void timerCallback()
-{
-  // print("Timer called back!");
-}
-
 // TArray<Frame*> TestFrameList;
 void CreateFrameList()
 {
@@ -172,10 +167,8 @@ void UMyStaticLibrary::profileCode(UWorld* const World)
   // auto PlayerCon = UGameplayStatics::GetPlayerController(World, 0);
   // auto PlayerCon = GetWorld()->GetFirstPlayerController();
 
-  if (true) // Toggle this to easily disable profiling
+  if (false) // Toggle this to easily disable profiling
   {
-    CreateFrameList();
-    
     TimerSystem::SetTimer(1, [](){
       int32 loopNum = 1;
       // loopNum = 100;

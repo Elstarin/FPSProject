@@ -327,146 +327,35 @@ void AFPSHUD::DrawPrintBox()
 	// DrawJoyRect(Canvas->SizeX / 2 - 100, Canvas->SizeY / 2 - 50, 200, 100, FLinearColor(0, 0, 1, 0.2333));
 }
 
-class socket
-{
-public:
-  // Each frame will have its own array of sockets. When a function is assigned to a socket, it gets added into the array. If an event is for a specific frame, like MOUSE_ENTER, I can call Fire_MOUSE_ENTER directly. However, that will not work for something like GAME_LOAD which may have a lot of interested frames. So, there needs to be a second way of calling it that does not require the actual frame itself. A generic Fire function.
-  
-  // So, to be able to do that I need to be able to iterate through every frame that is registered for GAME_LOAD. It's easy enough to figure out if a frame is registered by checking if (GAME_LOAD), so does that mean I must iterate through every single frame when an event is fired?
-  
-  // How slow would this be?
-  
-	// void (*OnEvent)();
-	// void (*OnEvent)(int32);
-  
-  typedef void (*FuncType)();
-  
-  static TArray<FuncType> SocketList;
-  
-  void (*MOUSE_ENTER)();
-  void Set_MOUSE_ENTER(FuncType func){MOUSE_ENTER = func;}
-  void Fire_MOUSE_ENTER() const {MOUSE_ENTER();}
-  
-  void (*MOUSE_EXIT)();
-  void Set_MOUSE_EXIT(FuncType func){MOUSE_EXIT = func;}
-  void Fire_MOUSE_EXIT() const {MOUSE_EXIT();}
-  
-  void (*MOUSE_CLICKED_DOWN)();
-  void Set_MOUSE_CLICKED_DOWN(FuncType func){MOUSE_CLICKED_DOWN = func;}
-  void Fire_MOUSE_CLICKED_DOWN() const {MOUSE_CLICKED_DOWN();}
-  
-  void (*MOUSE_CLICKED_UP)();
-  void Set_MOUSE_CLICKED_UP(FuncType func){MOUSE_CLICKED_UP = func;}
-  void Fire_MOUSE_CLICKED_UP() const {MOUSE_CLICKED_UP();}
-  
-  void (*UPDATE)();
-  void (*KEY_DOWN)();
-  void (*KEY_UP)();
-  void (*GAME_LOAD)();
-  void (*GAME_EXIT)();
-  void (*MOUSE_MOVEMENT)();
-  
-  // FuncType sockets[2] = {
-  //   OnMouseEnter,
-  //   OnMouseExit
-  // };
-  
-  void InitializeSockets()
-  {
-    // SocketList.Emplace(OnMouseEnter);
-    // SocketList.Emplace(OnMouseExit);
-  }
-  
-  void CallEvent()
-  {
-    // OnMouseEnter();
-    // SocketList[0]->OnMouseEnter();
-    // SocketList[0].OnMouseEnter();
-    
-    // if (OnMouseEnter)
-    // {
-    //   print("Call worked!");
-    // }
-    //
-    // if (OnMouseExit)
-    // {
-    //   print("Second call worked!");
-    // }
-  }
-};
-
 void AFPSHUD::Startup()
 {
   static bool hasRun = false;
   if (hasRun) return;
   hasRun = true;
   
-  // socket newSocket;
-  // newSocket.InitializeSockets();
-  
-  // newSocket.Set_MOUSE_ENTER([](){
-  //   print("MOUSE_ENTER");
-  // });
-  
-  // newSocket.Fire_MOUSE_ENTER();
-  
-  Frame::InitializeEventList();
-  
-  auto f1 = Frame::CreateFrame("", "Frame1", "BACKGROUND", 0);
+  auto f1 = Frame::CreateFrame("2D", "Frame1", "BACKGROUND", 0);
   f1->SetPosition(200, 200);
   f1->SetSize(100, 100);
   f1->SetColor(1.f, 1.f, 1.f, 1.f);
   
-  // f1->SetScript(OnUpdate, []()
+  // f1->OnUpdate([](auto f)
   // {
-  //   // print("Update...");
-  // });
-  
-  f1->Set_UPDATE([]()
-  {
-    print("UPDATE!");
-  });
-  
-  f1->Set_MOUSE_EXIT([]()
-  {
-    print("MOUSE_EXIT 1!");
-  });
-  
-  f1->Set_MOUSE_EXIT([]()
-  {
-    print("MOUSE_EXIT 2!");
-  });
-  
-  Frame::Fire(EventEnum::UPDATE);
-  Frame::Fire(EventEnum::MOUSE_EXIT);
-  
-  // f1->RegisterEvent(MOUSE_ENTER);
-  // f1->RegisterEvent(MOUSE_EXIT);
-  // f1->RegisterEvent(KEY_DOWN_LeftMouseButton);
-  // f1->RegisterEvent(KEY_UP_LeftMouseButton);
-  // f1->RegisterEvent(KEY_DOWN_RightMouseButton);
-  // f1->RegisterEvent(KEY_UP_RightMouseButton);
-  
-  // f1->OnEvent([](auto f, auto event)
-  // {
-  //   switch (event)
-  //   {
-  //   case MOUSE_ENTER:
-  //   {
-  //     float r = FMath::FRandRange(0, 1);
-  //     float g = FMath::FRandRange(0, 1);
-  //     float b = FMath::FRandRange(0, 1);
   //
-  //     f->SetColor(r, g, b, 1.f);
-  //     print("MOUSE_ENTER", f->GetName(), f->GetColor());
-  //     break;
-  //   }
-  //   case MOUSE_EXIT:
-  //     f->SetColor(1.f, 1.f, 1.f, 1.f);
-  //     print("MOUSE_EXIT", f->GetName());
-  //     break;
-  //   }
   // });
+  
+  f1->Set_MOUSE_ENTER([](auto f)
+  {
+    float r = FMath::FRandRange(0, 1);
+    float g = FMath::FRandRange(0, 1);
+    float b = FMath::FRandRange(0, 1);
+
+    f->SetColor(r, g, b, 1.f);
+  });
+  
+  f1->Set_MOUSE_EXIT([](auto f)
+  {
+    f->SetColor(1.f, 1.f, 1.f, 1.f);
+  });
   
   auto f2 = Frame::CreateFrame("", "Frame2", "BACKGROUND", 0);
   f2->SetPosition(0, 0);
@@ -484,13 +373,14 @@ void AFPSHUD::CheckMouseoverFrames(Frame* f, int32 left, int32 right, int32 top,
     if (false == f->GetMouseOver())
     {
       f->SetMouseOver(true);
-      Frame::Fire(MOUSE_ENTER);
+      f->FireToFrame(EventEnum::MOUSE_ENTER);
     }
   }
   // MouseLocation check failed, make sure it's false
   else if (true == f->GetMouseOver())
   {
-    Frame::Fire(MOUSE_EXIT);
+    f->FireToFrame(EventEnum::MOUSE_EXIT);
+    // Frame::Fire(MOUSE_EXIT);
     f->SetMouseOver(false);
   }
 }
@@ -498,7 +388,7 @@ void AFPSHUD::CheckMouseoverFrames(Frame* f, int32 left, int32 right, int32 top,
 void AFPSHUD::DrawFrames()
 {
   TimerSystem::IterateTimerArrays();
-  Frame::IterateScriptArrays();
+  Frame::IterateOnUpdateList();
   
   // Update the mouse's position
   PC->GetMousePosition(MouseLocation.X, MouseLocation.Y);
@@ -1502,6 +1392,8 @@ void CheckModKeys(APlayerController* PC)
 
 void AFPSHUD::CheckAllKeys()
 {
+  if (true) return;
+  
   // This function profiles at about 277 times per millisecond with all enabled
   
   // Later, have an array of possible actions and let each one be assigned to
